@@ -1,358 +1,760 @@
---// Services
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local MarketplaceService = game:GetService("MarketplaceService")
-local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+--[[
 
---// ScreenGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CustomUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
+		Gui2Lua™
+		10zOfficial
+		Version 1.0.0
 
---// Main Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BorderSizePixel = 0
-mainFrame.ClipsDescendants = true
-mainFrame.Parent = screenGui
+]]
 
---// Rounded corners for main frame
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = mainFrame
 
---// Header Text
-local sectionLabel = Instance.new("TextLabel")
-sectionLabel.Size = UDim2.new(0.6, 0, 0, 40)
-sectionLabel.Position = UDim2.new(0.2, 0, 0, 10)
-sectionLabel.Text = "Home"
-sectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-sectionLabel.Font = Enum.Font.GothamBold
-sectionLabel.TextSize = 24
-sectionLabel.BackgroundTransparency = 1
-sectionLabel.Parent = mainFrame
+-- Instances
 
---// Arrows
-local leftArrow = Instance.new("TextButton")
-leftArrow.Size = UDim2.new(0, 30, 0, 30)
-leftArrow.Position = UDim2.new(0, 10, 0, 10)
-leftArrow.Text = "<"
-leftArrow.Font = Enum.Font.GothamBold
-leftArrow.TextSize = 24
-leftArrow.BackgroundTransparency = 1
-leftArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
-leftArrow.Parent = mainFrame
+local ScreenGui = Instance.new("ScreenGui")
+local A = Instance.new("Frame")
+local UICorner = Instance.new("UICorner")
+local TextLabel = Instance.new("TextLabel")
+local TextLabel_2 = Instance.new("TextLabel")
+local Frame = Instance.new("Frame")
+local A2 = Instance.new("ScrollingFrame")
+local Frame_2 = Instance.new("Frame")
+local UICorner_2 = Instance.new("UICorner")
+local TextButton = Instance.new("TextButton")
+local ImageLabel = Instance.new("ImageLabel")
+local Frame_3 = Instance.new("Frame")
+local UICorner_3 = Instance.new("UICorner")
+local TextButton_2 = Instance.new("TextButton")
+local ImageLabel_2 = Instance.new("ImageLabel")
+local Frame_4 = Instance.new("Frame")
+local UICorner_4 = Instance.new("UICorner")
+local TextButton_3 = Instance.new("TextButton")
+local ImageLabel_3 = Instance.new("ImageLabel")
+local Frame_5 = Instance.new("Frame")
+local UICorner_5 = Instance.new("UICorner")
+local TextButton_4 = Instance.new("TextButton")
+local ImageLabel_4 = Instance.new("ImageLabel")
+local Frame_6 = Instance.new("Frame")
+local UICorner_6 = Instance.new("UICorner")
+local TextButton_5 = Instance.new("TextButton")
+local ImageLabel_5 = Instance.new("ImageLabel")
+local Frame_7 = Instance.new("Frame")
+local UICorner_7 = Instance.new("UICorner")
+local TextButton_6 = Instance.new("TextButton")
+local ImageLabel_6 = Instance.new("ImageLabel")
+local ImageLabel_7 = Instance.new("ImageLabel")
+local ImageLabel_8 = Instance.new("ImageLabel")
+local ImageLabel_9 = Instance.new("ImageLabel")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
 
-local rightArrow = Instance.new("TextButton")
-rightArrow.Size = UDim2.new(0, 30, 0, 30)
-rightArrow.Position = UDim2.new(1, -40, 0, 10)
-rightArrow.Text = ">"
-rightArrow.Font = Enum.Font.GothamBold
-rightArrow.TextSize = 24
-rightArrow.BackgroundTransparency = 1
-rightArrow.TextColor3 = Color3.fromRGB(255, 255, 255)
-rightArrow.Parent = mainFrame
+-- Properties
 
---// Particle System for background animation
-local particleContainer = Instance.new("Frame")
-particleContainer.Size = UDim2.new(1, 0, 1, 0)
-particleContainer.BackgroundTransparency = 1
-particleContainer.Parent = mainFrame
+ScreenGui.Parent = game.GcoreGui
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local particles = {}
-local particleCount = 15 -- أقل عدد من الجسيمات
+A.Name = "A"
+A.Parent = ScreenGui
+A.AnchorPoint = Vector2.new(0.5, 0.5)
+A.BackgroundColor3 = Color3.new(1, 1, 1)
+A.BackgroundTransparency = 0.019999999552965164
+A.BorderColor3 = Color3.new(0, 0, 0)
+A.BorderSizePixel = 0
+A.Position = UDim2.new(0.511919916, 0, 0.544476032, 0)
+A.Size = UDim2.new(0.256249994, 0, 0.607970357, 0)
 
-for i = 1, particleCount do
-    local particle = Instance.new("Frame")
-    particle.Size = UDim2.new(0, math.random(2, 3), 0, math.random(2, 3)) -- أصغر حجم
-    
-    -- تحويل الجسيمات إلى دوائر
-    local particleCorner = Instance.new("UICorner")
-    particleCorner.CornerRadius = UDim.new(1, 0) -- دائرة كاملة
-    particleCorner.Parent = particle
-    
-    particle.Position = UDim2.new(0, math.random(0, 390), 0, math.random(0, 310))
-    particle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    particle.BorderSizePixel = 0
-    particle.BackgroundTransparency = 0.8 -- أكثر شفافية
-    particle.ZIndex = 0 -- خلف النص
-    particle.Parent = particleContainer
-    
-    -- تخزين بيانات الجسيم
-    particles[i] = {
-        object = particle,
-        speedX = (math.random(-20, 20) / 100), -- أبطأ حركة
-        speedY = (math.random(-20, 20) / 100),
-        transparency = 0.8,
-        transparencyDir = math.random() > 0.5 and 1 or -1,
-        size = math.random(2, 3)
-    }
+UICorner.Parent = A
+UICorner.CornerRadius = UDim.new(0, 0)
+
+TextLabel.Parent = A
+TextLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+TextLabel.BackgroundTransparency = 1
+TextLabel.BorderColor3 = Color3.new(0, 0, 0)
+TextLabel.BorderSizePixel = 0
+TextLabel.Position = UDim2.new(0.296747953, 0, 0.0457317084, 0)
+TextLabel.Size = UDim2.new(0.104166664, 0, 0.0463392027, 0)
+TextLabel.Font = Enum.Font.SourceSans
+TextLabel.Text = "سحب (اكادمية ريفن)"
+TextLabel.TextColor3 = Color3.new(1, 1, 1)
+TextLabel.TextSize = 65
+
+TextLabel_2.Parent = A
+TextLabel_2.BackgroundColor3 = Color3.new(1, 1, 1)
+TextLabel_2.BackgroundTransparency = 1
+TextLabel_2.BorderColor3 = Color3.new(0, 0, 0)
+TextLabel_2.BorderSizePixel = 0
+TextLabel_2.Position = UDim2.new(0.296747953, 0, 0.137195125, 0)
+TextLabel_2.Size = UDim2.new(0.104166664, 0, 0.0463392027, 0)
+TextLabel_2.Font = Enum.Font.SourceSans
+TextLabel_2.Text = "ملاحظة: هذه جزء من السكربت الرئيسي "
+TextLabel_2.TextColor3 = Color3.new(1, 1, 1)
+TextLabel_2.TextSize = 35
+
+Frame.Parent = A
+Frame.BackgroundColor3 = Color3.new(1, 1, 1)
+Frame.BorderColor3 = Color3.new(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.0529015996, 0, 0.214918002, 0)
+Frame.Size = UDim2.new(0.228125006, 0, 0.00463392027, 0)
+
+A2.Name = "A2"
+A2.Parent = A
+A2.Active = true
+A2.BackgroundColor3 = Color3.new(1, 1, 1)
+A2.BackgroundTransparency = 1
+A2.BorderColor3 = Color3.new(0, 0, 0)
+A2.BorderSizePixel = 0
+A2.Position = UDim2.new(0.0146201532, 0, 0.24706696, 0)
+A2.Size = UDim2.new(0.246875003, 0, 0.440222442, 0)
+
+Frame_2.Parent = A2
+Frame_2.BackgroundColor3 = Color3.new(0.0509804, 0.0431373, 0.301961)
+Frame_2.BorderColor3 = Color3.new(0, 0, 0)
+Frame_2.BorderSizePixel = 0
+Frame_2.Position = UDim2.new(0.0397351757, 0, 0.0161900874, 0)
+Frame_2.Size = UDim2.new(0.100520834, 0, 0.0426320657, 0)
+
+UICorner_2.Parent = Frame_2
+
+TextButton.Parent = Frame_2
+TextButton.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton.BackgroundTransparency = 1
+TextButton.BorderColor3 = Color3.new(0, 0, 0)
+TextButton.BorderSizePixel = 0
+TextButton.Position = UDim2.new(0.187796026, 0, 0, 0)
+TextButton.Size = UDim2.new(0.0708333328, 0, 0.0463392027, 0)
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = "ارميهم في البحر"
+TextButton.TextColor3 = Color3.new(1, 1, 1)
+TextButton.TextSize = 39
+
+ImageLabel.Parent = TextButton
+ImageLabel.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel.BackgroundTransparency = 1
+ImageLabel.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(-0.269392133, 0, -0.415740967, 0)
+ImageLabel.Size = UDim2.new(0.0187500007, 0, 0.0296570901, 0)
+ImageLabel.Image = "rbxassetid://483446873"
+ImageLabel.ImageColor3 = Color3.new(1, 0, 0.0156863)
+ImageLabel.ImageTransparency = 1
+
+Frame_3.Parent = A2
+Frame_3.BackgroundColor3 = Color3.new(0.0509804, 0.0431373, 0.301961)
+Frame_3.BorderColor3 = Color3.new(0, 0, 0)
+Frame_3.BorderSizePixel = 0
+Frame_3.Position = UDim2.new(0.579586744, 0, 0.0192388669, 0)
+Frame_3.Size = UDim2.new(0.0895833299, 0, 0.0426320657, 0)
+
+UICorner_3.Parent = Frame_3
+
+TextButton_2.Parent = Frame_3
+TextButton_2.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton_2.BackgroundTransparency = 1
+TextButton_2.BorderColor3 = Color3.new(0, 0, 0)
+TextButton_2.BorderSizePixel = 0
+TextButton_2.Position = UDim2.new(0.235671639, 0, -0.0869565234, 0)
+TextButton_2.Size = UDim2.new(0.0557291657, 0, 0.0463392027, 0)
+TextButton_2.Font = Enum.Font.SourceSans
+TextButton_2.Text = "غطسهم"
+TextButton_2.TextColor3 = Color3.new(1, 1, 1)
+TextButton_2.TextSize = 51
+
+ImageLabel_2.Parent = TextButton_2
+ImageLabel_2.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_2.BackgroundTransparency = 1
+ImageLabel_2.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_2.BorderSizePixel = 0
+ImageLabel_2.Position = UDim2.new(-0.269392133, 0, -0.415740967, 0)
+ImageLabel_2.Size = UDim2.new(0.0187500007, 0, 0.0296570901, 0)
+ImageLabel_2.Image = "rbxassetid://483446873"
+ImageLabel_2.ImageColor3 = Color3.new(1, 0, 0.0156863)
+ImageLabel_2.ImageTransparency = 1
+
+Frame_4.Parent = A2
+Frame_4.BackgroundColor3 = Color3.new(0.0509804, 0.0431373, 0.301961)
+Frame_4.BorderColor3 = Color3.new(0, 0, 0)
+Frame_4.BorderSizePixel = 0
+Frame_4.Position = UDim2.new(0.0397351757, 0, 0.0794522837, 0)
+Frame_4.Size = UDim2.new(0.100520834, 0, 0.0426320657, 0)
+
+UICorner_4.Parent = Frame_4
+
+TextButton_3.Parent = Frame_4
+TextButton_3.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton_3.BackgroundTransparency = 1
+TextButton_3.BorderColor3 = Color3.new(0, 0, 0)
+TextButton_3.BorderSizePixel = 0
+TextButton_3.Position = UDim2.new(0.146345228, 0, 0, 0)
+TextButton_3.Size = UDim2.new(0.0708333328, 0, 0.0463392027, 0)
+TextButton_3.Font = Enum.Font.SourceSans
+TextButton_3.Text = "ارميهم في المكان السري"
+TextButton_3.TextColor3 = Color3.new(1, 1, 1)
+TextButton_3.TextSize = 28
+
+ImageLabel_3.Parent = TextButton_3
+ImageLabel_3.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_3.BackgroundTransparency = 1
+ImageLabel_3.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_3.BorderSizePixel = 0
+ImageLabel_3.Position = UDim2.new(-0.269392133, 0, -0.415740967, 0)
+ImageLabel_3.Size = UDim2.new(0.0187500007, 0, 0.0296570901, 0)
+ImageLabel_3.Image = "rbxassetid://483446873"
+ImageLabel_3.ImageColor3 = Color3.new(1, 0, 0.0156863)
+ImageLabel_3.ImageTransparency = 1
+
+Frame_5.Parent = A2
+Frame_5.BackgroundColor3 = Color3.new(0.0509804, 0.0431373, 0.301961)
+Frame_5.BorderColor3 = Color3.new(0, 0, 0)
+Frame_5.BorderSizePixel = 0
+Frame_5.Position = UDim2.new(0.579586744, 0, 0.0794522837, 0)
+Frame_5.Size = UDim2.new(0.0895833299, 0, 0.0426320657, 0)
+
+UICorner_5.Parent = Frame_5
+
+TextButton_4.Parent = Frame_5
+TextButton_4.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton_4.BackgroundTransparency = 1
+TextButton_4.BorderColor3 = Color3.new(0, 0, 0)
+TextButton_4.BorderSizePixel = 0
+TextButton_4.Position = UDim2.new(0.237650767, 0, -0.0434782617, 0)
+TextButton_4.Size = UDim2.new(0.0557291657, 0, 0.0463392027, 0)
+TextButton_4.Font = Enum.Font.SourceSans
+TextButton_4.Text = "احشرهم"
+TextButton_4.TextColor3 = Color3.new(1, 1, 1)
+TextButton_4.TextSize = 51
+
+ImageLabel_4.Parent = TextButton_4
+ImageLabel_4.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_4.BackgroundTransparency = 1
+ImageLabel_4.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_4.BorderSizePixel = 0
+ImageLabel_4.Position = UDim2.new(-0.269392133, 0, -0.415740967, 0)
+ImageLabel_4.Size = UDim2.new(0.0187500007, 0, 0.0296570901, 0)
+ImageLabel_4.Image = "rbxassetid://483446873"
+ImageLabel_4.ImageColor3 = Color3.new(1, 0, 0.0156863)
+ImageLabel_4.ImageTransparency = 1
+
+Frame_6.Parent = A2
+Frame_6.BackgroundColor3 = Color3.new(0.0509804, 0.0431373, 0.301961)
+Frame_6.BorderColor3 = Color3.new(0, 0, 0)
+Frame_6.BorderSizePixel = 0
+Frame_6.Position = UDim2.new(0.263305664, 0, 0.151860818, 0)
+Frame_6.Size = UDim2.new(0.114583336, 0, 0.0426320657, 0)
+
+UICorner_6.Parent = Frame_6
+
+TextButton_5.Parent = Frame_6
+TextButton_5.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton_5.BackgroundTransparency = 1
+TextButton_5.BorderColor3 = Color3.new(0, 0, 0)
+TextButton_5.BorderSizePixel = 0
+TextButton_5.Position = UDim2.new(0.187796026, 0, 0, 0)
+TextButton_5.Size = UDim2.new(0.0708333328, 0, 0.0463392027, 0)
+TextButton_5.Font = Enum.Font.SourceSans
+TextButton_5.Text = "اسحبهم لعندك"
+TextButton_5.TextColor3 = Color3.new(1, 1, 1)
+TextButton_5.TextSize = 32
+
+ImageLabel_5.Parent = TextButton_5
+ImageLabel_5.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_5.BackgroundTransparency = 1
+ImageLabel_5.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_5.BorderSizePixel = 0
+ImageLabel_5.Position = UDim2.new(-0.269392133, 0, -0.415740967, 0)
+ImageLabel_5.Size = UDim2.new(0.0187500007, 0, 0.0296570901, 0)
+ImageLabel_5.Image = "rbxassetid://483446873"
+ImageLabel_5.ImageColor3 = Color3.new(1, 0, 0.0156863)
+ImageLabel_5.ImageTransparency = 1
+
+Frame_7.Parent = A2
+Frame_7.BackgroundColor3 = Color3.new(1, 1, 1)
+Frame_7.BorderColor3 = Color3.new(0, 0, 0)
+Frame_7.BorderSizePixel = 0
+Frame_7.Position = UDim2.new(0.26541537, 0, 0.236464471, 0)
+Frame_7.Size = UDim2.new(0.114583336, 0, 0.0426320657, 0)
+
+UICorner_7.Parent = Frame_7
+
+TextButton_6.Parent = Frame_7
+TextButton_6.BackgroundColor3 = Color3.new(1, 1, 1)
+TextButton_6.BackgroundTransparency = 1
+TextButton_6.BorderColor3 = Color3.new(0, 0, 0)
+TextButton_6.BorderSizePixel = 0
+TextButton_6.Position = UDim2.new(0.187796026, 0, 0, 0)
+TextButton_6.Size = UDim2.new(0.0708333328, 0, 0.0463392027, 0)
+TextButton_6.Font = Enum.Font.SourceSans
+TextButton_6.Text = "تشغيل السكربت الرئيسي"
+TextButton_6.TextColor3 = Color3.new(0, 0, 0)
+TextButton_6.TextSize = 32
+
+ImageLabel_6.Parent = A2
+ImageLabel_6.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_6.BackgroundTransparency = 1
+ImageLabel_6.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_6.BorderSizePixel = 0
+ImageLabel_6.Position = UDim2.new(-0.788403749, 0, -0.268707991, 0)
+ImageLabel_6.Size = UDim2.new(0.605208337, 0, 0.8303985, 0)
+ImageLabel_6.Image = "rbxassetid://106379443682584"
+ImageLabel_6.ImageTransparency = 0.9700000286102295
+
+ImageLabel_7.Parent = A
+ImageLabel_7.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_7.BackgroundTransparency = 1
+ImageLabel_7.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_7.BorderSizePixel = 0
+ImageLabel_7.Position = UDim2.new(0.0216987431, 0, 0.0213414636, 0)
+ImageLabel_7.Size = UDim2.new(0.0265625007, 0, 0.0454124175, 0)
+
+ImageLabel_8.Parent = A
+ImageLabel_8.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_8.BackgroundTransparency = 1
+ImageLabel_8.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_8.BorderSizePixel = 0
+ImageLabel_8.Position = UDim2.new(-0.0272977259, 0, 0.0459551923, 0)
+ImageLabel_8.Rotation = 2
+ImageLabel_8.Size = UDim2.new(0.0348958336, 0, 0.054680258, 0)
+ImageLabel_8.Image = "rbxassetid://17169180878"
+ImageLabel_8.ImageColor3 = Color3.new(0.894118, 0.933333, 1)
+
+ImageLabel_9.Parent = A
+ImageLabel_9.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageLabel_9.BackgroundTransparency = 1
+ImageLabel_9.BorderColor3 = Color3.new(0, 0, 0)
+ImageLabel_9.BorderSizePixel = 0
+ImageLabel_9.Position = UDim2.new(-0.212335348, 0, -0.150914639, 0)
+ImageLabel_9.Rotation = -17
+ImageLabel_9.Size = UDim2.new(0.123437501, 0, 0.219647825, 0)
+ImageLabel_9.Image = "rbxassetid://137496030683368"
+
+UIAspectRatioConstraint.Parent = A
+UIAspectRatioConstraint.AspectRatio = 0.75
+
+ImageButton.Parent = ScreenGui
+ImageButton.BackgroundColor3 = Color3.new(1, 1, 1)
+ImageButton.BackgroundTransparency = 1
+ImageButton.BorderColor3 = Color3.new(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Position = UDim2.new(0.122828439, 0, 0.233388245, 0)
+ImageButton.Size = UDim2.new(0.0375000015, 0, 0.0648748875, 0)
+ImageButton.Image = "rbxassetid://17169180878"
+ImageButton.ImageColor3 = Color3.new(0.0823529, 0, 1)
+
+UIAspectRatioConstraint_2.Parent = ImageButton
+UIAspectRatioConstraint_2.AspectRatio = 1.0285714864730835
+
+-- Scripts
+
+local function BFALKX_fake_script() -- A.LocalScript 
+	local script = Instance.new('LocalScript', A)
+
+	local TweenService = game:GetService("TweenService")
+	local gradient = script.Parent:WaitForChild("UIGradient")
+	
+	local tweenInfo = TweenInfo.new(
+		10, -- مدة الحركة (كل ما زادت = أبطأ)
+		Enum.EasingStyle.Linear, -- حركة ناعمة
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- ذهاب وإياب
+	)
+	
+	local tween = TweenService:Create(
+		gradient,
+		tweenInfo,
+		{Rotation = 360} -- دوران التدرج
+	)
+	
+	tween:Play()
+	
 end
+coroutine.wrap(BFALKX_fake_script)()
+local function SXROLOY_fake_script() -- TextButton.LocalScript 
+	local script = Instance.new('LocalScript', TextButton)
 
---// Particle animation function
-local function updateParticles(deltaTime)
-    for _, particleData in ipairs(particles) do
-        local particle = particleData.object
-        local currentPos = particle.Position
-        
-        -- تحديث الموضع بسرعة أبطأ
-        local newX = currentPos.X.Offset + (particleData.speedX * 30 * deltaTime)
-        local newY = currentPos.Y.Offset + (particleData.speedY * 30 * deltaTime)
-        
-        -- الارتداد من الحواف
-        if newX < 0 then
-            newX = 0
-            particleData.speedX = math.abs(particleData.speedX)
-        elseif newX > 390 then
-            newX = 390
-            particleData.speedX = -math.abs(particleData.speedX)
-        end
-        
-        if newY < 0 then
-            newY = 0
-            particleData.speedY = math.abs(particleData.speedY)
-        elseif newY > 310 then
-            newY = 310
-            particleData.speedY = -math.abs(particleData.speedY)
-        end
-        
-        particle.Position = UDim2.new(0, newX, 0, newY)
-        
-        -- تحديث الشفافية (تأثير التلاشي البطيء)
-        particleData.transparency = particleData.transparency + (particleData.transparencyDir * deltaTime * 0.3) -- أبطأ
-        
-        if particleData.transparency > 0.9 then
-            particleData.transparency = 0.9
-            particleData.transparencyDir = -1
-        elseif particleData.transparency < 0.5 then
-            particleData.transparency = 0.5
-            particleData.transparencyDir = 1
-        end
-        
-        particle.BackgroundTransparency = particleData.transparency
-    end
+	local TweenService = game:GetService("TweenService")
+	
+	local button = script.Parent
+	local image = button:WaitForChild("ImageLabel")
+	
+	local isActive = false
+	local pulseTween
+	
+	-- إعدادات النبض (تلاشي)
+	local pulseInfo = TweenInfo.new(
+		1, -- مدة النبض (أكبر = أبطأ)
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- اختفاء ورجوع
+	)
+	
+	button.MouseButton1Click:Connect(function()
+		if not isActive then
+			-- إظهار + بدء النبض
+			image.ImageTransparency = 0
+			pulseTween = TweenService:Create(
+				image,
+				pulseInfo,
+				{ImageTransparency = 0.6} -- مقدار الاختفاء
+			)
+			pulseTween:Play()
+		else
+			-- إيقاف النبض + إخفاء
+			if pulseTween then
+				pulseTween:Cancel()
+			end
+			image.ImageTransparency = 1
+		end
+	
+		isActive = not isActive
+	end)
+	
 end
+coroutine.wrap(SXROLOY_fake_script)()
+local function RFOQK_fake_script() -- TextButton_2.LocalScript 
+	local script = Instance.new('LocalScript', TextButton_2)
 
---// ربط حركة الجسيمات بـ RenderStepped
-RunService.RenderStepped:Connect(updateParticles)
-
---// Sections
-local sections = {"Home", "Locations", "Players", "Teleport", "Player"}
-local currentIndex = 1
-local sectionFrames = {}
-
---// الحصول على اسم الماب (اللعبة)
-local gameName = "Unknown Game"
-local success, result = pcall(function()
-    return MarketplaceService:GetProductInfo(game.PlaceId).Name
-end)
-
-if success then
-    gameName = result
+	local TweenService = game:GetService("TweenService")
+	
+	local button = script.Parent
+	local image = button:WaitForChild("ImageLabel")
+	
+	local isActive = false
+	local pulseTween
+	
+	-- إعدادات النبض (تلاشي)
+	local pulseInfo = TweenInfo.new(
+		1, -- مدة النبض (أكبر = أبطأ)
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- اختفاء ورجوع
+	)
+	
+	button.MouseButton1Click:Connect(function()
+		if not isActive then
+			-- إظهار + بدء النبض
+			image.ImageTransparency = 0
+			pulseTween = TweenService:Create(
+				image,
+				pulseInfo,
+				{ImageTransparency = 0.6} -- مقدار الاختفاء
+			)
+			pulseTween:Play()
+		else
+			-- إيقاف النبض + إخفاء
+			if pulseTween then
+				pulseTween:Cancel()
+			end
+			image.ImageTransparency = 1
+		end
+	
+		isActive = not isActive
+	end)
+	
 end
+coroutine.wrap(RFOQK_fake_script)()
+local function UPQMBS_fake_script() -- TextButton_3.LocalScript 
+	local script = Instance.new('LocalScript', TextButton_3)
 
-for i, name in ipairs(sections) do
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0.9, 0, 0.75, 0)
-    frame.Position = UDim2.new(0.05, 0, 0, 80)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- رمادي غامق بدلاً من الأسود
-    frame.BackgroundTransparency = 0.3 -- شفافية أقل
-    frame.BorderSizePixel = 0
-    frame.Visible = (i == currentIndex)
-    frame.Name = name
-    
-    -- إضافة حواف مستديرة للإطار
-    local frameCorner = Instance.new("UICorner")
-    frameCorner.CornerRadius = UDim.new(0, 8)
-    frameCorner.Parent = frame
-    
-    frame.Parent = mainFrame
-    
-    -- إنشاء محتوى مختلف لكل قسم
-    if name == "Player" then
-        -- قسم خاص للاعب مع صورة البروفايل
-        local playerInfoContainer = Instance.new("Frame")
-        playerInfoContainer.Size = UDim2.new(1, 0, 0, 100)
-        playerInfoContainer.Position = UDim2.new(0, 0, 0, 10)
-        playerInfoContainer.BackgroundTransparency = 1
-        playerInfoContainer.Parent = frame
-        
-        -- صورة البروفايل
-        local avatarFrame = Instance.new("Frame")
-        avatarFrame.Size = UDim2.new(0, 80, 0, 80)
-        avatarFrame.Position = UDim2.new(0, 20, 0, 0)
-        avatarFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        avatarFrame.BorderSizePixel = 0
-        
-        local avatarCorner = Instance.new("UICorner")
-        avatarCorner.CornerRadius = UDim.new(0, 12)
-        avatarCorner.Parent = avatarFrame
-        
-        -- إضافة صورة البروفايل
-        local avatarImage = Instance.new("ImageLabel")
-        avatarImage.Size = UDim2.new(1, 0, 1, 0)
-        avatarImage.Position = UDim2.new(0, 0, 0, 0)
-        avatarImage.BackgroundTransparency = 1
-        
-        -- الحصول على صورة البروفايل
-        local userId = player.UserId
-        local thumbType = Enum.ThumbnailType.HeadShot
-        local thumbSize = Enum.ThumbnailSize.Size420x420
-        
-        pcall(function()
-            local content, isReady = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
-            if content then
-                avatarImage.Image = content
-            else
-                avatarImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-            end
-        end)
-        
-        avatarImage.Parent = avatarFrame
-        avatarFrame.Parent = playerInfoContainer
-        
-        -- معلومات اللاعب على يمين الصورة
-        local infoFrame = Instance.new("Frame")
-        infoFrame.Size = UDim2.new(0, 240, 0, 80)
-        infoFrame.Position = UDim2.new(0, 110, 0, 0)
-        infoFrame.BackgroundTransparency = 1
-        infoFrame.Parent = playerInfoContainer
-        
-        -- اسم اللاعب
-        local playerNameLabel = Instance.new("TextLabel")
-        playerNameLabel.Size = UDim2.new(1, 0, 0, 30)
-        playerNameLabel.Position = UDim2.new(0, 0, 0, 0)
-        playerNameLabel.Text = player.Name
-        playerNameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        playerNameLabel.Font = Enum.Font.GothamBold
-        playerNameLabel.TextSize = 18
-        playerNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        playerNameLabel.BackgroundTransparency = 1
-        playerNameLabel.Parent = infoFrame
-        
-        -- فاصل |
-        local separator = Instance.new("TextLabel")
-        separator.Size = UDim2.new(1, 0, 0, 20)
-        separator.Position = UDim2.new(0, 0, 0, 30)
-        separator.Text = "|"
-        separator.TextColor3 = Color3.fromRGB(150, 150, 150)
-        separator.Font = Enum.Font.Gotham
-        separator.TextSize = 14
-        separator.TextXAlignment = Enum.TextXAlignment.Left
-        separator.BackgroundTransparency = 1
-        separator.Parent = infoFrame
-        
-        -- اسم الماب
-        local gameNameLabel = Instance.new("TextLabel")
-        gameNameLabel.Size = UDim2.new(1, 0, 0, 30)
-        gameNameLabel.Position = UDim2.new(0, 0, 0, 50)
-        gameNameLabel.Text = "In: " .. gameName
-        gameNameLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-        gameNameLabel.Font = Enum.Font.Gotham
-        gameNameLabel.TextSize = 14
-        gameNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        gameNameLabel.BackgroundTransparency = 1
-        gameNameLabel.Parent = infoFrame
-        
-        -- معلومات إضافية
-        local statsFrame = Instance.new("Frame")
-        statsFrame.Size = UDim2.new(1, -40, 0, 100)
-        statsFrame.Position = UDim2.new(0, 20, 0, 110)
-        statsFrame.BackgroundTransparency = 1
-        statsFrame.Parent = frame
-        
-        local statsLabel = Instance.new("TextLabel")
-        statsLabel.Size = UDim2.new(1, 0, 1, 0)
-        statsLabel.Text = "Player Stats:\nLevel: 1\nExperience: 0/100\nCoins: 0"
-        statsLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-        statsLabel.Font = Enum.Font.Gotham
-        statsLabel.TextSize = 14
-        statsLabel.TextXAlignment = Enum.TextXAlignment.Left
-        statsLabel.TextYAlignment = Enum.TextYAlignment.Top
-        statsLabel.BackgroundTransparency = 1
-        statsLabel.Parent = statsFrame
-    else
-        -- المحتوى العادي للأقسام الأخرى
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, 0, 0, 40)
-        label.Position = UDim2.new(0, 0, 0, 10)
-        label.Text = name
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 20
-        label.TextXAlignment = Enum.TextXAlignment.Center
-        label.BackgroundTransparency = 1
-        label.Parent = frame
-        
-        -- خط فاصل تحت العنوان
-        local titleSeparator = Instance.new("Frame")
-        titleSeparator.Size = UDim2.new(0.8, 0, 0, 1)
-        titleSeparator.Position = UDim2.new(0.1, 0, 0, 50)
-        titleSeparator.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-        titleSeparator.BorderSizePixel = 0
-        titleSeparator.Parent = frame
-        
-        -- محتوى القسم
-        local contentLabel = Instance.new("TextLabel")
-        contentLabel.Size = UDim2.new(1, -40, 1, -80)
-        contentLabel.Position = UDim2.new(0, 20, 0, 70)
-        contentLabel.Text = name .. " Content Area\n\nThis section contains\n" .. name .. " related features."
-        contentLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-        contentLabel.Font = Enum.Font.Gotham
-        contentLabel.TextSize = 16
-        contentLabel.TextXAlignment = Enum.TextXAlignment.Center
-        contentLabel.TextYAlignment = Enum.TextYAlignment.Top
-        contentLabel.BackgroundTransparency = 1
-        contentLabel.Parent = frame
-    end
-    
-    sectionFrames[i] = frame
+	local TweenService = game:GetService("TweenService")
+	
+	local button = script.Parent
+	local image = button:WaitForChild("ImageLabel")
+	
+	local isActive = false
+	local pulseTween
+	
+	-- إعدادات النبض (تلاشي)
+	local pulseInfo = TweenInfo.new(
+		1, -- مدة النبض (أكبر = أبطأ)
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- اختفاء ورجوع
+	)
+	
+	button.MouseButton1Click:Connect(function()
+		if not isActive then
+			-- إظهار + بدء النبض
+			image.ImageTransparency = 0
+			pulseTween = TweenService:Create(
+				image,
+				pulseInfo,
+				{ImageTransparency = 0.6} -- مقدار الاختفاء
+			)
+			pulseTween:Play()
+		else
+			-- إيقاف النبض + إخفاء
+			if pulseTween then
+				pulseTween:Cancel()
+			end
+			image.ImageTransparency = 1
+		end
+	
+		isActive = not isActive
+	end)
+	
 end
+coroutine.wrap(UPQMBS_fake_script)()
+local function SQZUQY_fake_script() -- TextButton_4.LocalScript 
+	local script = Instance.new('LocalScript', TextButton_4)
 
---// Function to change section with animation
-local function changeSection(newIndex, direction)
-    if newIndex < 1 then
-        newIndex = #sections
-    end
-    if newIndex > #sections then
-        newIndex = 1
-    end
-    
-    local oldFrame = sectionFrames[currentIndex]
-    local newFrame = sectionFrames[newIndex]
-    
-    local offset = (direction == "right") and 400 or -400
-    
-    local tweenOut = TweenService:Create(oldFrame, TweenInfo.new(0.3), {
-        Position = oldFrame.Position + UDim2.new(0, -offset, 0, 0)
-    })
-    tweenOut:Play()
-    tweenOut.Completed:Connect(function()
-        oldFrame.Visible = false
-        oldFrame.Position = UDim2.new(0.05, 0, 0, 80)
-    end)
-    
-    newFrame.Position = UDim2.new(0.05, offset, 0, 80)
-    newFrame.Visible = true
-    local tweenIn = TweenService:Create(newFrame, TweenInfo.new(0.3), {
-        Position = UDim2.new(0.05, 0, 0, 80)
-    })
-    tweenIn:Play()
-    
-    sectionLabel.Text = sections[newIndex]
-    currentIndex = newIndex
+	local TweenService = game:GetService("TweenService")
+	
+	local button = script.Parent
+	local image = button:WaitForChild("ImageLabel")
+	
+	local isActive = false
+	local pulseTween
+	
+	-- إعدادات النبض (تلاشي)
+	local pulseInfo = TweenInfo.new(
+		1, -- مدة النبض (أكبر = أبطأ)
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- اختفاء ورجوع
+	)
+	
+	button.MouseButton1Click:Connect(function()
+		if not isActive then
+			-- إظهار + بدء النبض
+			image.ImageTransparency = 0
+			pulseTween = TweenService:Create(
+				image,
+				pulseInfo,
+				{ImageTransparency = 0.6} -- مقدار الاختفاء
+			)
+			pulseTween:Play()
+		else
+			-- إيقاف النبض + إخفاء
+			if pulseTween then
+				pulseTween:Cancel()
+			end
+			image.ImageTransparency = 1
+		end
+	
+		isActive = not isActive
+	end)
+	
 end
+coroutine.wrap(SQZUQY_fake_script)()
+local function OLAWCV_fake_script() -- TextButton_5.LocalScript 
+	local script = Instance.new('LocalScript', TextButton_5)
 
---// Arrow Buttons
-leftArrow.MouseButton1Click:Connect(function()
-    changeSection(currentIndex - 1, "left")
-end)
+	local TweenService = game:GetService("TweenService")
+	
+	local button = script.Parent
+	local image = button:WaitForChild("ImageLabel")
+	
+	local isActive = false
+	local pulseTween
+	
+	-- إعدادات النبض (تلاشي)
+	local pulseInfo = TweenInfo.new(
+		1, -- مدة النبض (أكبر = أبطأ)
+		Enum.EasingStyle.Sine,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- اختفاء ورجوع
+	)
+	
+	button.MouseButton1Click:Connect(function()
+		if not isActive then
+			-- إظهار + بدء النبض
+			image.ImageTransparency = 0
+			pulseTween = TweenService:Create(
+				image,
+				pulseInfo,
+				{ImageTransparency = 0.6} -- مقدار الاختفاء
+			)
+			pulseTween:Play()
+		else
+			-- إيقاف النبض + إخفاء
+			if pulseTween then
+				pulseTween:Cancel()
+			end
+			image.ImageTransparency = 1
+		end
+	
+		isActive = not isActive
+	end)
+	
+end
+coroutine.wrap(OLAWCV_fake_script)()
+local function IDNBJBW_fake_script() -- Frame_7.LocalScript 
+	local script = Instance.new('LocalScript', Frame_7)
 
-rightArrow.MouseButton1Click:Connect(function()
-    changeSection(currentIndex + 1, "right")
-end)
+	local TweenService = game:GetService("TweenService")
+	local frame = script.Parent
+	local gradient = frame:WaitForChild("UIGradient")
+	
+	-- إعدادات التوين
+	local tweenInfo = TweenInfo.new(
+		3, -- مدة التحرك
+		Enum.EasingStyle.Linear,
+		Enum.EasingDirection.InOut,
+		-1, -- تكرار لا نهائي
+		true -- ذهاب وإياب
+	)
+	
+	-- Tween من اليمين لليسار
+	local tween = TweenService:Create(
+		gradient,
+		tweenInfo,
+		{Offset = Vector2.new(1, 0)} -- هنا تتحرك من الوضع الطبيعي لـ x=1
+	)
+	
+	-- نبدأ من اليسار
+	gradient.Offset = Vector2.new(0, 0)
+	
+	tween:Play()
+	
+end
+coroutine.wrap(IDNBJBW_fake_script)()
+local function SFQXBTL_fake_script() -- A.LocalScript 
+	local script = Instance.new('LocalScript', A)
+
+	local frame = script.Parent
+	local userInputService = game:GetService("UserInputService")
+	
+	local dragging = false
+	local dragStartPos
+	local frameStartPos
+	
+	-- بدء السحب
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStartPos = input.Position
+			frameStartPos = frame.Position
+	
+			-- إيقاف السحب عند رفع الماوس
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	-- أثناء السحب
+	frame.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStartPos
+			frame.Position = UDim2.new(
+				frameStartPos.X.Scale,
+				frameStartPos.X.Offset + delta.X,
+				frameStartPos.Y.Scale,
+				frameStartPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+	
+end
+coroutine.wrap(SFQXBTL_fake_script)()
+local function WOJVV_fake_script() -- A.LocalScript 
+	local script = Instance.new('LocalScript', A)
+
+	local frame = script.Parent
+	local userInputService = game:GetService("UserInputService")
+	
+	local dragging = false
+	local dragStartPos
+	local frameStartPos
+	
+	-- بدء السحب
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStartPos = input.Position
+			frameStartPos = frame.Position
+	
+			-- إيقاف السحب عند رفع الماوس
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	-- أثناء السحب
+	frame.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStartPos
+			frame.Position = UDim2.new(
+				frameStartPos.X.Scale,
+				frameStartPos.X.Offset + delta.X,
+				frameStartPos.Y.Scale,
+				frameStartPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+	
+end
+coroutine.wrap(WOJVV_fake_script)()
+local function OCGA_fake_script() -- A.LocalScript 
+	local script = Instance.new('LocalScript', A)
+
+	local UISizeConstraint = Instance.new("UISizeConstraint")
+	UISizeConstraint.MinSize = Vector2.new(450, 300) -- أصغر حجم
+	UISizeConstraint.MaxSize = Vector2.new(900, 650) -- أكبر حجم
+	UISizeConstraint.Parent = A
+	
+end
+coroutine.wrap(OCGA_fake_script)()
+local function QZVPE_fake_script() -- ImageButton.LocalScript 
+	local script = Instance.new('LocalScript', ImageButton)
+
+	local button = script.Parent
+	local screenGui = button:FindFirstAncestorOfClass("ScreenGui") -- نبحث عن الـ ScreenGui الأعلى
+	local frameA = screenGui:WaitForChild("A") -- الـ Frame الذي نريد التحكم به
+	
+	button.MouseButton1Click:Connect(function()
+		frameA.Visible = not frameA.Visible -- تبديل الإخفاء والظهور
+	end)
+	
+end
+coroutine.wrap(QZVPE_fake_script)()
+local function XJKY_fake_script() -- ImageButton.LocalScript 
+	local script = Instance.new('LocalScript', ImageButton)
+
+	local button = script.Parent
+	local userInputService = game:GetService("UserInputService")
+	
+	local dragging = false
+	local dragStartPos
+	local buttonStartPos
+	
+	-- بدء السحب
+	button.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStartPos = input.Position
+			buttonStartPos = button.Position
+	
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	
+	-- أثناء السحب
+	button.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStartPos
+			button.Position = UDim2.new(
+				buttonStartPos.X.Scale,
+				buttonStartPos.X.Offset + delta.X,
+				buttonStartPos.Y.Scale,
+				buttonStartPos.Y.Offset + delta.Y
+			)
+		end
+	end)
+	
+end
+coroutine.wrap(XJKY_fake_script)()
