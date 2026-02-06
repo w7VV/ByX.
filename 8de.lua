@@ -33,9 +33,195 @@ local COLORS = {
 --// إعدادات افتراضية
 local settings = {
     killOnStop = false,
-    returnToOldPosition = true,
-    excludedPlayers = {}
+    returnToOldPosition = true
 }
+
+--// متغيرات الفلاي والـ noclip
+local flyEnabled = false
+local flySpeed = 1
+local noclipEnabled = false
+
+local flyConnections = {}
+local noclipConnection = nil
+
+--// دوال الفلاي
+local function activateFly()
+    local chr = player.Character
+    if not chr then return end
+    local hum = chr:FindFirstChildWhichIsA("Humanoid")
+    if not hum then return end
+
+    -- تعطيل الحركات الأخرى
+    hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Running, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
+    hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+    hum:ChangeState(Enum.HumanoidStateType.Swimming)
+
+    -- إعداد الفلاي
+    local torso = chr:FindFirstChild("Torso") or chr:FindFirstChild("UpperTorso")
+    if not torso then return end
+
+    local bg = Instance.new("BodyGyro", torso)
+    bg.P = 9e4
+    bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bg.cframe = torso.CFrame
+    local bv = Instance.new("BodyVelocity", torso)
+    bv.velocity = Vector3.new(0, 0.1, 0)
+    bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+
+    hum.PlatformStand = true
+
+    local ctrl = {f = 0, b = 0, l = 0, r = 0}
+    local lastctrl = {f = 0, b = 0, l = 0, r = 0}
+    local maxspeed = 50
+    local speed = 0
+
+    -- وظيفة تحديث السرعة
+    local function updateVelocity()
+        if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
+            speed = speed + 0.5 + (speed / maxspeed)
+            if speed > maxspeed then
+                speed = maxspeed
+            end
+        elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
+            speed = speed - 1
+            if speed < 0 then
+                speed = 0
+            end
+        end
+
+        if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
+            bv.velocity = ((Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f + ctrl.b)) + ((Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l + ctrl.r, (ctrl.f + ctrl.b) * 0.2, 0).p) - Workspace.CurrentCamera.CoordinateFrame.p)) * speed
+            lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
+        elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
+            bv.velocity = ((Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f + lastctrl.b)) + ((Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l + lastctrl.r, (lastctrl.f + lastctrl.b) * 0.2, 0).p) - Workspace.CurrentCamera.CoordinateFrame.p)) * speed
+        else
+            bv.velocity = Vector3.new(0, 0, 0)
+        end
+
+        bg.cframe = Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(-math.rad((ctrl.f + ctrl.b) * 50 * speed / maxspeed), 0, 0)
+    end
+
+    -- اتصال المدخلات
+    local inputConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.W then
+            ctrl.f = flySpeed
+        elseif input.KeyCode == Enum.KeyCode.S then
+            ctrl.b = -flySpeed
+        elseif input.KeyCode == Enum.KeyCode.A then
+            ctrl.l = -flySpeed
+        elseif input.KeyCode == Enum.KeyCode.D then
+            ctrl.r = flySpeed
+        end
+    end)
+
+    local inputEndConnection = UserInputService.InputEnded:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.W then
+            ctrl.f = 0
+        elseif input.KeyCode == Enum.KeyCode.S then
+            ctrl.b = 0
+        elseif input.KeyCode == Enum.KeyCode.A then
+            ctrl.l = 0
+        elseif input.KeyCode == Enum.KeyCode.D then
+            ctrl.r = 0
+        end
+    end)
+
+    -- تحديث مستمر
+    local renderConnection = RunService.RenderStepped:Connect(function()
+        updateVelocity()
+    end)
+
+    table.insert(flyConnections, inputConnection)
+    table.insert(flyConnections, inputEndConnection)
+    table.insert(flyConnections, renderConnection)
+
+    -- تخزين bg و bv للإزالة لاحقًا
+    flyConnections.bg = bg
+    flyConnections.bv = bv
+end
+
+local function deactivateFly()
+    -- إعادة تمكين الحركات
+    local chr = player.Character
+    if chr then
+        local hum = chr:FindFirstChildWhichIsA("Humanoid")
+        if hum then
+            hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Flying, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Landed, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Physics, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, true)
+            hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
+            hum.PlatformStand = false
+            hum:ChangeState(Enum.HumanoidStateType.Running)
+        end
+    end
+
+    -- قطع الاتصالات
+    for _, connection in pairs(flyConnections) do
+        if type(connection) == "RBXScriptConnection" then
+            connection:Disconnect()
+        end
+    end
+    flyConnections = {}
+
+    -- إزالة bg و bv
+    if flyConnections.bg then flyConnections.bg:Destroy() end
+    if flyConnections.bv then flyConnections.bv:Destroy() end
+end
+
+local function activateNoclip()
+    local chr = player.Character
+    if not chr then return end
+
+    noclipConnection = RunService.Stepped:Connect(function()
+        if chr then
+            for _, part in pairs(chr:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function deactivateNoclip()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+
+    local chr = player.Character
+    if chr then
+        for _, part in pairs(chr:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end
 
 --// ScreenGui
 local screenGui = Instance.new("ScreenGui")
@@ -47,8 +233,8 @@ screenGui.Parent = PlayerGui
 --// زر الإعدادات (صورة) في الزاوية اليمين - حجم أصغر
 local settingsButton = Instance.new("ImageButton")
 settingsButton.Name = "SettingsButton"
-settingsButton.Size = UDim2.new(0, 35, 0, 35) -- حجم أصغر
-settingsButton.Position = UDim2.new(1, -45, 0, 15) -- تعديل الموقع
+settingsButton.Size = UDim2.new(0, 35, 0, 35)
+settingsButton.Position = UDim2.new(1, -45, 0, 15)
 settingsButton.AnchorPoint = Vector2.new(1, 0)
 settingsButton.BackgroundColor3 = COLORS.BACKGROUND
 settingsButton.BackgroundTransparency = 0.3
@@ -252,7 +438,7 @@ local buttonConfigs = {
 --// نافذة الإعدادات - نفس حجم الفارم الرئيسي
 local settingsFrame = Instance.new("Frame")
 settingsFrame.Name = "SettingsFrame"
-settingsFrame.Size = UDim2.new(0, 220, 0, 500) -- نفس حجم الفارم الرئيسي
+settingsFrame.Size = UDim2.new(0, 220, 0, 500)
 settingsFrame.Position = UDim2.new(1, -20, 0, 80)
 settingsFrame.AnchorPoint = Vector2.new(1, 0)
 settingsFrame.BackgroundColor3 = COLORS.BACKGROUND
@@ -272,7 +458,7 @@ settingsCorner.CornerRadius = UDim.new(0, 12)
 settingsCorner.Parent = settingsFrame
 
 local settingsHeader = Instance.new("Frame")
-settingsHeader.Size = UDim2.new(1, 0, 0, 40) -- ارتفاع أقل
+settingsHeader.Size = UDim2.new(1, 0, 0, 40)
 settingsHeader.BackgroundColor3 = COLORS.GLASS_1
 settingsHeader.BackgroundTransparency = 0.4
 settingsHeader.BorderSizePixel = 0
@@ -289,13 +475,13 @@ settingsTitle.Size = UDim2.new(1, 0, 1, 0)
 settingsTitle.Text = "الإعدادات"
 settingsTitle.TextColor3 = COLORS.TEXT_WHITE
 settingsTitle.Font = Enum.Font.GothamBold
-settingsTitle.TextSize = 18 -- أصغر قليلاً
+settingsTitle.TextSize = 18
 settingsTitle.BackgroundTransparency = 1
 settingsTitle.ZIndex = 103
 settingsTitle.Parent = settingsHeader
 
 local settingsContent = Instance.new("ScrollingFrame")
-settingsContent.Size = UDim2.new(1, -10, 1, -50) -- تعديل المساحة
+settingsContent.Size = UDim2.new(1, -10, 1, -50)
 settingsContent.Position = UDim2.new(0, 5, 0, 45)
 settingsContent.BackgroundTransparency = 1
 settingsContent.BorderSizePixel = 0
@@ -306,7 +492,7 @@ settingsContent.ZIndex = 102
 settingsContent.Parent = settingsFrame
 
 local settingsList = Instance.new("UIListLayout")
-settingsList.Padding = UDim.new(0, 10) -- تباعد أقل
+settingsList.Padding = UDim.new(0, 10)
 settingsList.HorizontalAlignment = Enum.HorizontalAlignment.Center
 settingsList.SortOrder = Enum.SortOrder.LayoutOrder
 settingsList.Parent = settingsContent
@@ -317,7 +503,7 @@ end)
 
 --// خيار: موت الاعب عند إيقاف العمليه
 local killOptionFrame = Instance.new("Frame")
-killOptionFrame.Size = UDim2.new(1, 0, 0, 40) -- ارتفاع أقل
+killOptionFrame.Size = UDim2.new(1, 0, 0, 40)
 killOptionFrame.BackgroundColor3 = COLORS.BUTTON_BASE
 killOptionFrame.BackgroundTransparency = 0.65
 killOptionFrame.BorderSizePixel = 0
@@ -330,19 +516,19 @@ killOptionCorner.CornerRadius = UDim.new(0, 6)
 killOptionCorner.Parent = killOptionFrame
 
 local killOptionText = Instance.new("TextLabel")
-killOptionText.Size = UDim2.new(0.65, -10, 1, 0) -- مساحة أقل للنص
+killOptionText.Size = UDim2.new(0.65, -10, 1, 0)
 killOptionText.Position = UDim2.new(0, 8, 0, 0)
 killOptionText.Text = "موت عند الإيقاف"
 killOptionText.TextColor3 = COLORS.TEXT_WHITE
 killOptionText.Font = Enum.Font.GothamBold
-killOptionText.TextSize = 14 -- أصغر
+killOptionText.TextSize = 14
 killOptionText.TextXAlignment = Enum.TextXAlignment.Left
 killOptionText.BackgroundTransparency = 1
 killOptionText.ZIndex = 104
 killOptionText.Parent = killOptionFrame
 
 local killToggleFrame = Instance.new("Frame")
-killToggleFrame.Size = UDim2.new(0, 50, 0, 25) -- أصغر
+killToggleFrame.Size = UDim2.new(0, 50, 0, 25)
 killToggleFrame.Position = UDim2.new(1, -58, 0.5, -12.5)
 killToggleFrame.AnchorPoint = Vector2.new(1, 0.5)
 killToggleFrame.BackgroundColor3 = settings.killOnStop and COLORS.GREEN or COLORS.GRAY
@@ -372,7 +558,7 @@ end)
 
 --// خيار: الانتقال إلى مكانك القديم بعد إيقاف العمليه
 local returnOptionFrame = Instance.new("Frame")
-returnOptionFrame.Size = UDim2.new(1, 0, 0, 40) -- ارتفاع أقل
+returnOptionFrame.Size = UDim2.new(1, 0, 0, 40)
 returnOptionFrame.BackgroundColor3 = COLORS.BUTTON_BASE
 returnOptionFrame.BackgroundTransparency = 0.65
 returnOptionFrame.BorderSizePixel = 0
@@ -425,198 +611,243 @@ returnToggleButton.MouseButton1Click:Connect(function()
     returnToggleButton.Text = settings.returnToOldPosition and "ON" or "OFF"
 end)
 
---// قسم قائمة استثناء الاعبين
-local exclusionSectionTitle = Instance.new("TextLabel")
-exclusionSectionTitle.Size = UDim2.new(1, 0, 0, 30)
-exclusionSectionTitle.Position = UDim2.new(0, 0, 0, 0)
-exclusionSectionTitle.Text = "استثناء اللاعبين"
-exclusionSectionTitle.TextColor3 = COLORS.TEXT_WHITE
-exclusionSectionTitle.Font = Enum.Font.GothamBold
-exclusionSectionTitle.TextSize = 16
-exclusionSectionTitle.BackgroundTransparency = 1
-exclusionSectionTitle.ZIndex = 103
-exclusionSectionTitle.LayoutOrder = 3
-exclusionSectionTitle.Parent = settingsContent
+--// قسم الطيران (Fly)
+local flySectionTitle = Instance.new("TextLabel")
+flySectionTitle.Size = UDim2.new(1, 0, 0, 30)
+flySectionTitle.Position = UDim2.new(0, 0, 0, 0)
+flySectionTitle.Text = "الطيران (Fly)"
+flySectionTitle.TextColor3 = COLORS.TEXT_WHITE
+flySectionTitle.Font = Enum.Font.GothamBold
+flySectionTitle.TextSize = 16
+flySectionTitle.BackgroundTransparency = 1
+flySectionTitle.ZIndex = 103
+flySectionTitle.LayoutOrder = 3
+flySectionTitle.Parent = settingsContent
 
---// مربع البحث - مبسط
-local searchFrame = Instance.new("Frame")
-searchFrame.Size = UDim2.new(1, 0, 0, 35)
-searchFrame.BackgroundColor3 = COLORS.BUTTON_BASE
-searchFrame.BackgroundTransparency = 0.65
-searchFrame.BorderSizePixel = 0
-searchFrame.ZIndex = 103
-searchFrame.LayoutOrder = 4
-searchFrame.Parent = settingsContent
+local flyOptionFrame = Instance.new("Frame")
+flyOptionFrame.Size = UDim2.new(1, 0, 0, 40)
+flyOptionFrame.BackgroundColor3 = COLORS.BUTTON_BASE
+flyOptionFrame.BackgroundTransparency = 0.65
+flyOptionFrame.BorderSizePixel = 0
+flyOptionFrame.ZIndex = 103
+flyOptionFrame.LayoutOrder = 4
+flyOptionFrame.Parent = settingsContent
 
-local searchCorner = Instance.new("UICorner")
-searchCorner.CornerRadius = UDim.new(0, 6)
-searchCorner.Parent = searchFrame
+local flyOptionCorner = Instance.new("UICorner")
+flyOptionCorner.CornerRadius = UDim.new(0, 6)
+flyOptionCorner.Parent = flyOptionFrame
 
-local searchBox = Instance.new("TextBox")
-searchBox.Size = UDim2.new(0.7, -5, 0.8, 0)
-searchBox.Position = UDim2.new(0, 5, 0.5, -12)
-searchBox.AnchorPoint = Vector2.new(0, 0.5)
-searchBox.PlaceholderText = "اسم اللاعب..."
-searchBox.Text = ""
-searchBox.TextColor3 = COLORS.TEXT_WHITE
-searchBox.Font = Enum.Font.Gotham
-searchBox.TextSize = 14
-searchBox.BackgroundColor3 = COLORS.GLASS_1
-searchBox.BackgroundTransparency = 0.7
-searchBox.ZIndex = 104
-searchBox.Parent = searchFrame
+local flyOptionText = Instance.new("TextLabel")
+flyOptionText.Size = UDim2.new(0.5, -10, 1, 0)
+flyOptionText.Position = UDim2.new(0, 8, 0, 0)
+flyOptionText.Text = "تفعيل الطيران"
+flyOptionText.TextColor3 = COLORS.TEXT_WHITE
+flyOptionText.Font = Enum.Font.GothamBold
+flyOptionText.TextSize = 14
+flyOptionText.TextXAlignment = Enum.TextXAlignment.Left
+flyOptionText.BackgroundTransparency = 1
+flyOptionText.ZIndex = 104
+flyOptionText.Parent = flyOptionFrame
 
-local searchBoxCorner = Instance.new("UICorner")
-searchBoxCorner.CornerRadius = UDim.new(0, 4)
-searchBoxCorner.Parent = searchBox
+local flyToggleFrame = Instance.new("Frame")
+flyToggleFrame.Size = UDim2.new(0, 50, 0, 25)
+flyToggleFrame.Position = UDim2.new(1, -58, 0.5, -12.5)
+flyToggleFrame.AnchorPoint = Vector2.new(1, 0.5)
+flyToggleFrame.BackgroundColor3 = flyEnabled and COLORS.GREEN or COLORS.GRAY
+flyToggleFrame.BorderSizePixel = 0
+flyToggleFrame.ZIndex = 104
+flyToggleFrame.Parent = flyOptionFrame
 
-local addButton = Instance.new("TextButton")
-addButton.Size = UDim2.new(0.25, -5, 0.8, 0)
-addButton.Position = UDim2.new(0.75, 5, 0.5, -12)
-addButton.AnchorPoint = Vector2.new(0, 0.5)
-addButton.Text = "إضافة"
-addButton.TextColor3 = COLORS.TEXT_WHITE
-addButton.Font = Enum.Font.GothamBold
-addButton.TextSize = 14
-addButton.BackgroundColor3 = COLORS.GREEN
-addButton.BackgroundTransparency = 0.3
-addButton.ZIndex = 104
-addButton.Parent = searchFrame
+local flyToggleCorner = Instance.new("UICorner")
+flyToggleCorner.CornerRadius = UDim.new(1, 0)
+flyToggleCorner.Parent = flyToggleFrame
 
-local addButtonCorner = Instance.new("UICorner")
-addButtonCorner.CornerRadius = UDim.new(0, 4)
-addButtonCorner.Parent = addButton
+local flyToggleButton = Instance.new("TextButton")
+flyToggleButton.Size = UDim2.new(1, 0, 1, 0)
+flyToggleButton.Text = flyEnabled and "ON" or "OFF"
+flyToggleButton.TextColor3 = COLORS.TEXT_WHITE
+flyToggleButton.Font = Enum.Font.GothamBold
+flyToggleButton.TextSize = 12
+flyToggleButton.BackgroundTransparency = 1
+flyToggleButton.ZIndex = 105
+flyToggleButton.Parent = flyToggleFrame
 
---// قائمة اللاعبين المستبعدين
-local exclusionListFrame = Instance.new("Frame")
-exclusionListFrame.Size = UDim2.new(1, 0, 0, 180)
-exclusionListFrame.BackgroundColor3 = COLORS.BUTTON_BASE
-exclusionListFrame.BackgroundTransparency = 0.65
-exclusionListFrame.BorderSizePixel = 0
-exclusionListFrame.ZIndex = 103
-exclusionListFrame.LayoutOrder = 5
-exclusionListFrame.Parent = settingsContent
+--// عرض سرعة الفلاي وأزرار التحكم
+local speedDisplayFrame = Instance.new("Frame")
+speedDisplayFrame.Size = UDim2.new(1, 0, 0, 40)
+speedDisplayFrame.BackgroundColor3 = COLORS.BUTTON_BASE
+speedDisplayFrame.BackgroundTransparency = 0.65
+speedDisplayFrame.BorderSizePixel = 0
+speedDisplayFrame.ZIndex = 103
+speedDisplayFrame.LayoutOrder = 5
+speedDisplayFrame.Parent = settingsContent
 
-local exclusionListCorner = Instance.new("UICorner")
-exclusionListCorner.CornerRadius = UDim.new(0, 6)
-exclusionListCorner.Parent = exclusionListFrame
+local speedDisplayCorner = Instance.new("UICorner")
+speedDisplayCorner.CornerRadius = UDim.new(0, 6)
+speedDisplayCorner.Parent = speedDisplayFrame
 
-local exclusionScrolling = Instance.new("ScrollingFrame")
-exclusionScrolling.Size = UDim2.new(1, -10, 1, -10)
-exclusionScrolling.Position = UDim2.new(0, 5, 0, 5)
-exclusionScrolling.BackgroundTransparency = 1
-exclusionScrolling.BorderSizePixel = 0
-exclusionScrolling.ScrollBarThickness = 6
-exclusionScrolling.ScrollBarImageColor3 = COLORS.GLASS_2
-exclusionScrolling.CanvasSize = UDim2.new(0, 0, 0, 0)
-exclusionScrolling.ZIndex = 104
-exclusionScrolling.Parent = exclusionListFrame
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(0.4, -5, 1, 0)
+speedLabel.Position = UDim2.new(0, 5, 0, 0)
+speedLabel.Text = "السرعة:"
+speedLabel.TextColor3 = COLORS.TEXT_WHITE
+speedLabel.Font = Enum.Font.GothamBold
+speedLabel.TextSize = 14
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.BackgroundTransparency = 1
+speedLabel.ZIndex = 104
+speedLabel.Parent = speedDisplayFrame
 
-local exclusionListLayout = Instance.new("UIListLayout")
-exclusionListLayout.Padding = UDim.new(0, 6)
-exclusionListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-exclusionListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-exclusionListLayout.Parent = exclusionScrolling
+local speedValueLabel = Instance.new("TextLabel")
+speedValueLabel.Size = UDim2.new(0.2, -5, 1, 0)
+speedValueLabel.Position = UDim2.new(0.4, 0, 0, 0)
+speedValueLabel.Text = tostring(flySpeed)
+speedValueLabel.TextColor3 = COLORS.TEXT_WHITE
+speedValueLabel.Font = Enum.Font.GothamBold
+speedValueLabel.TextSize = 14
+speedValueLabel.TextXAlignment = Enum.TextXAlignment.Center
+speedValueLabel.BackgroundTransparency = 1
+speedValueLabel.ZIndex = 104
+speedValueLabel.Parent = speedDisplayFrame
 
-exclusionListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    exclusionScrolling.CanvasSize = UDim2.new(0, 0, 0, exclusionListLayout.AbsoluteContentSize.Y + 10)
+local plusButton = Instance.new("TextButton")
+plusButton.Size = UDim2.new(0, 30, 0, 30)
+plusButton.Position = UDim2.new(0.65, 5, 0.5, -15)
+plusButton.AnchorPoint = Vector2.new(0, 0.5)
+plusButton.Text = "+"
+plusButton.TextColor3 = COLORS.TEXT_WHITE
+plusButton.Font = Enum.Font.GothamBold
+plusButton.TextSize = 20
+plusButton.BackgroundColor3 = COLORS.GREEN
+plusButton.BackgroundTransparency = 0.3
+plusButton.ZIndex = 104
+plusButton.Parent = speedDisplayFrame
+
+local plusButtonCorner = Instance.new("UICorner")
+plusButtonCorner.CornerRadius = UDim.new(0, 4)
+plusButtonCorner.Parent = plusButton
+
+local minusButton = Instance.new("TextButton")
+minusButton.Size = UDim2.new(0, 30, 0, 30)
+minusButton.Position = UDim2.new(0.85, 5, 0.5, -15)
+minusButton.AnchorPoint = Vector2.new(0, 0.5)
+minusButton.Text = "-"
+minusButton.TextColor3 = COLORS.TEXT_WHITE
+minusButton.Font = Enum.Font.GothamBold
+minusButton.TextSize = 20
+minusButton.BackgroundColor3 = COLORS.RED
+minusButton.BackgroundTransparency = 0.3
+minusButton.ZIndex = 104
+minusButton.Parent = speedDisplayFrame
+
+local minusButtonCorner = Instance.new("UICorner")
+minusButtonCorner.CornerRadius = UDim.new(0, 4)
+minusButtonCorner.Parent = minusButton
+
+--// قسم اختراق الجدران (Noclip)
+local noclipSectionTitle = Instance.new("TextLabel")
+noclipSectionTitle.Size = UDim2.new(1, 0, 0, 30)
+noclipSectionTitle.Position = UDim2.new(0, 0, 0, 0)
+noclipSectionTitle.Text = "اختراق الجدران (Noclip)"
+noclipSectionTitle.TextColor3 = COLORS.TEXT_WHITE
+noclipSectionTitle.Font = Enum.Font.GothamBold
+noclipSectionTitle.TextSize = 16
+noclipSectionTitle.BackgroundTransparency = 1
+noclipSectionTitle.ZIndex = 103
+noclipSectionTitle.LayoutOrder = 6
+noclipSectionTitle.Parent = settingsContent
+
+local noclipOptionFrame = Instance.new("Frame")
+noclipOptionFrame.Size = UDim2.new(1, 0, 0, 40)
+noclipOptionFrame.BackgroundColor3 = COLORS.BUTTON_BASE
+noclipOptionFrame.BackgroundTransparency = 0.65
+noclipOptionFrame.BorderSizePixel = 0
+noclipOptionFrame.ZIndex = 103
+noclipOptionFrame.LayoutOrder = 7
+noclipOptionFrame.Parent = settingsContent
+
+local noclipOptionCorner = Instance.new("UICorner")
+noclipOptionCorner.CornerRadius = UDim.new(0, 6)
+noclipOptionCorner.Parent = noclipOptionFrame
+
+local noclipOptionText = Instance.new("TextLabel")
+noclipOptionText.Size = UDim2.new(0.5, -10, 1, 0)
+noclipOptionText.Position = UDim2.new(0, 8, 0, 0)
+noclipOptionText.Text = "تفعيل الـ Noclip"
+noclipOptionText.TextColor3 = COLORS.TEXT_WHITE
+noclipOptionText.Font = Enum.Font.GothamBold
+noclipOptionText.TextSize = 14
+noclipOptionText.TextXAlignment = Enum.TextXAlignment.Left
+noclipOptionText.BackgroundTransparency = 1
+noclipOptionText.ZIndex = 104
+noclipOptionText.Parent = noclipOptionFrame
+
+local noclipToggleFrame = Instance.new("Frame")
+noclipToggleFrame.Size = UDim2.new(0, 50, 0, 25)
+noclipToggleFrame.Position = UDim2.new(1, -58, 0.5, -12.5)
+noclipToggleFrame.AnchorPoint = Vector2.new(1, 0.5)
+noclipToggleFrame.BackgroundColor3 = noclipEnabled and COLORS.GREEN or COLORS.GRAY
+noclipToggleFrame.BorderSizePixel = 0
+noclipToggleFrame.ZIndex = 104
+noclipToggleFrame.Parent = noclipOptionFrame
+
+local noclipToggleCorner = Instance.new("UICorner")
+noclipToggleCorner.CornerRadius = UDim.new(1, 0)
+noclipToggleCorner.Parent = noclipToggleFrame
+
+local noclipToggleButton = Instance.new("TextButton")
+noclipToggleButton.Size = UDim2.new(1, 0, 1, 0)
+noclipToggleButton.Text = noclipEnabled and "ON" or "OFF"
+noclipToggleButton.TextColor3 = COLORS.TEXT_WHITE
+noclipToggleButton.Font = Enum.Font.GothamBold
+noclipToggleButton.TextSize = 12
+noclipToggleButton.BackgroundTransparency = 1
+noclipToggleButton.ZIndex = 105
+noclipToggleButton.Parent = noclipToggleFrame
+
+--// أحداث الفلاي
+flyToggleButton.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    flyToggleFrame.BackgroundColor3 = flyEnabled and COLORS.GREEN or COLORS.GRAY
+    flyToggleButton.Text = flyEnabled and "ON" or "OFF"
+    if flyEnabled then
+        activateFly()
+    else
+        deactivateFly()
+    end
 end)
 
---// دالة لعرض اللاعبين المستبعدين
-local function updateExclusionList()
-    for _, child in pairs(exclusionScrolling:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
+plusButton.MouseButton1Click:Connect(function()
+    flySpeed = flySpeed + 1
+    speedValueLabel.Text = tostring(flySpeed)
+    if flyEnabled then
+        deactivateFly()
+        activateFly()
     end
-    
-    for _, excludedPlayer in pairs(settings.excludedPlayers) do
-        local playerFrame = Instance.new("Frame")
-        playerFrame.Size = UDim2.new(1, -10, 0, 45) -- أصغر
-        playerFrame.BackgroundColor3 = COLORS.GLASS_1
-        playerFrame.BackgroundTransparency = 0.7
-        playerFrame.BorderSizePixel = 0
-        playerFrame.ZIndex = 105
-        playerFrame.Parent = exclusionScrolling
-        
-        local playerCorner = Instance.new("UICorner")
-        playerCorner.CornerRadius = UDim.new(0, 4)
-        playerCorner.Parent = playerFrame
-        
-        -- اسم اللاعب
-        local playerNameLabel = Instance.new("TextLabel")
-        playerNameLabel.Size = UDim2.new(0.6, -5, 1, 0)
-        playerNameLabel.Position = UDim2.new(0, 5, 0, 0)
-        playerNameLabel.Text = excludedPlayer
-        playerNameLabel.TextColor3 = COLORS.TEXT_WHITE
-        playerNameLabel.Font = Enum.Font.Gotham
-        playerNameLabel.TextSize = 12
-        playerNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        playerNameLabel.BackgroundTransparency = 1
-        playerNameLabel.ZIndex = 106
-        playerNameLabel.Parent = playerFrame
-        
-        -- زر الإزالة
-        local removeButton = Instance.new("TextButton")
-        removeButton.Size = UDim2.new(0, 60, 0, 25)
-        removeButton.Position = UDim2.new(1, -65, 0.5, -12.5)
-        removeButton.AnchorPoint = Vector2.new(1, 0.5)
-        removeButton.Text = "إزالة"
-        removeButton.TextColor3 = COLORS.TEXT_WHITE
-        removeButton.Font = Enum.Font.GothamBold
-        removeButton.TextSize = 12
-        removeButton.BackgroundColor3 = COLORS.RED
-        removeButton.BackgroundTransparency = 0.3
-        removeButton.ZIndex = 106
-        removeButton.Parent = playerFrame
-        
-        local removeCorner = Instance.new("UICorner")
-        removeCorner.CornerRadius = UDim.new(0, 4)
-        removeCorner.Parent = removeButton
-        
-        removeButton.MouseButton1Click:Connect(function()
-            for i, name in pairs(settings.excludedPlayers) do
-                if name == excludedPlayer then
-                    table.remove(settings.excludedPlayers, i)
-                    break
-                end
-            end
-            updateExclusionList()
-        end)
-    end
-end
-
---// زر الإضافة - مبسط بدون بحث تلقائي
-addButton.MouseButton1Click:Connect(function()
-    local playerName = searchBox.Text
-    if playerName == "" then return end
-    
-    -- التحقق إذا كان اللاعب مضافاً بالفعل
-    for _, excluded in pairs(settings.excludedPlayers) do
-        if excluded == playerName then
-            searchBox.Text = ""
-            return
-        end
-    end
-    
-    -- إضافة اللاعب إلى القائمة
-    table.insert(settings.excludedPlayers, playerName)
-    updateExclusionList()
-    searchBox.Text = ""
 end)
 
---// تحميل القائمة الأولية
-updateExclusionList()
-
---// دالة التحقق من اللاعب المستبعد
-local function isPlayerExcluded(playerName)
-    for _, excluded in pairs(settings.excludedPlayers) do
-        if excluded == playerName then
-            return true
+minusButton.MouseButton1Click:Connect(function()
+    if flySpeed > 1 then
+        flySpeed = flySpeed - 1
+        speedValueLabel.Text = tostring(flySpeed)
+        if flyEnabled then
+            deactivateFly()
+            activateFly()
         end
     end
-    return false
-end
+end)
+
+--// أحداث الـ noclip
+noclipToggleButton.MouseButton1Click:Connect(function()
+    noclipEnabled = not noclipEnabled
+    noclipToggleFrame.BackgroundColor3 = noclipEnabled and COLORS.GREEN or COLORS.GRAY
+    noclipToggleButton.Text = noclipEnabled and "ON" or "OFF"
+    if noclipEnabled then
+        activateNoclip()
+    else
+        deactivateNoclip()
+    end
+end)
 
 --// دالة لإنشاء حركة التلاشي للدائرة الحمراء
 local function createFadeAnimation(circle)
@@ -781,10 +1012,6 @@ local function startGeneralScript(dropCFrame, buttonName)
             
             for _, otherPlayer in pairs(Players:GetPlayers()) do
                 if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    -- التحقق من الاستثناء
-                    if isPlayerExcluded(otherPlayer.Name) then
-                        continue
-                    end
                     
                     if getPlayerPoints(otherPlayer) >= myPoints.Value then
                         continue
@@ -1152,7 +1379,3 @@ UserInputService.InputEnded:Connect(function(input)
         settingsDragging = false
     end
 end)
-
-print("✅ تم تحميل سكربت سحب أكاديمية ريفن بنجاح!")
-print("⚙️ الإعدادات الآن تعمل بشكل صحيح")
-print("🔍 نظام استبعاد اللاعبين جاهز")
