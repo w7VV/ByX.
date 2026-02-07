@@ -684,10 +684,12 @@ profileFrame.Position = UDim2.new(0.5, -50, 0, 20)
 profileFrame.BackgroundTransparency = 1
 profileFrame.Parent = playerContent
 
+-- استخدم ImageLabel بدلاً من ImageButton للبروفايل
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
 profileImage.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-profileImage.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. player.UserId .. "&width=150&height=150&format=png"
+-- استخدم رابط Roblox الرسمي
+profileImage.Image = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", player.UserId)
 profileImage.Parent = profileFrame
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
 
@@ -711,31 +713,41 @@ gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 gridLayout.Parent = playerButtonsFrame
 
--- بيانات الأزرار
+-- بيانات الأزرار مع Asset IDs
 local playerButtonsData = {
     {
         name = "Metal",
-        imageUrl = "https://i.imgur.com/hZXn5h7.png",
+        imageId = 13325345678, -- ID افتراضي، يمكن تغييره
         selected = false
     },
     {
         name = "Button 2",
-        imageUrl = "rbxassetid://0",
+        imageId = 0,
         selected = false
     },
     {
         name = "Button 3",
-        imageUrl = "rbxassetid://0",
+        imageId = 0,
         selected = false
     },
     {
         name = "Button 4",
-        imageUrl = "rbxassetid://0",
+        imageId = 0,
         selected = false
     }
 }
 
 local playerButtons = {}
+
+-- دالة لتحميل الصورة باستخدام Asset ID
+local function loadImageWithAssetId(imageLabel, assetId)
+    if assetId and assetId ~= 0 then
+        imageLabel.Image = "rbxassetid://" .. assetId
+    else
+        imageLabel.Image = ""
+        imageLabel.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    end
+end
 
 -- دالة لتحديث مظهر الدائرة
 local function updateSelectionCircle(circle, selected)
@@ -757,10 +769,12 @@ for i, buttonData in ipairs(playerButtonsData) do
     button.Size = UDim2.new(0.8, 0, 0.6, 0)
     button.Position = UDim2.new(0.1, 0, 0.1, 0)
     button.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    button.Image = buttonData.imageUrl
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
     Instance.new("UICorner", button).CornerRadius = UDim.new(0.2, 0)
+    
+    -- تحميل الصورة باستخدام Asset ID
+    loadImageWithAssetId(button, buttonData.imageId)
     
     -- الدائرة في الزاوية اليمنى العليا
     local selectionCircle = Instance.new("Frame")
