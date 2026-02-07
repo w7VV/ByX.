@@ -366,37 +366,69 @@ local function stealKeycard()
 end
 
 -- ===================================
--- إنشاء الواجهة الرسومية
+-- إنشاء الواجهة الرسومية مع التصميم الجديد
 -- ===================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GunSpawnerUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
+-- الإطار الرئيسي مع تأثير Liquid Glass
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 360, 0, 450)
 mainFrame.Position = UDim2.new(0, 20, 0.5, -225)
-mainFrame.BackgroundColor3 = Color3.new(1, 1, 1)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10) -- أسود داكن
+mainFrame.BackgroundTransparency = 0.15 -- تأثير الزجاج
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 16)
 
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(52, 50, 82)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(35, 22, 44)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 12, 19))
+-- تأثير الزجاج Liquid Glass
+local uiCorner = Instance.new("UICorner", mainFrame)
+uiCorner.CornerRadius = UDim.new(0, 16)
+
+-- تأثير Blur خلفي
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Size = 15
+blurEffect.Parent = mainFrame
+
+-- الإطار المتحرك مع تدرج الألوان
+local animatedStroke = Instance.new("Frame")
+animatedStroke.Name = "AnimatedStroke"
+animatedStroke.Size = UDim2.new(1, 6, 1, 6)
+animatedStroke.Position = UDim2.new(0, -3, 0, -3)
+animatedStroke.BackgroundTransparency = 1
+animatedStroke.Parent = mainFrame
+
+local strokeCorner = Instance.new("UICorner", animatedStroke)
+strokeCorner.CornerRadius = UDim.new(0, 19)
+
+-- التدرج اللوني المتحرك
+local movingGradient = Instance.new("UIGradient")
+movingGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)), -- أسود
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(43, 2, 69)), -- 2b0245
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)) -- أسود
 })
-gradient.Rotation = 0
-gradient.Parent = mainFrame
+movingGradient.Rotation = 0
+movingGradient.Parent = animatedStroke
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 3
-mainStroke.Color = Color3.fromRGB(0, 0, 0)
-mainStroke.Parent = mainFrame
+-- UIStroke للتدرج
+local gradientStroke = Instance.new("UIStroke", animatedStroke)
+gradientStroke.Thickness = 3
+gradientStroke.LineJoinMode = Enum.LineJoinMode.Round
+
+-- جعل التدرج يتحرك ببطء
+spawn(function()
+    while true do
+        for i = 0, 360, 1 do
+            movingGradient.Rotation = i
+            task.wait(0.03) -- سرعة الحركة
+        end
+    end
+end)
 
 -- التبويبات
 local tabNames = {"Locations", "Teleport"}
@@ -417,14 +449,22 @@ for i, name in ipairs(tabNames) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, buttonWidth, 1, 0)
     btn.Position = UDim2.new(0, (i-1) * (buttonWidth + tabPadding), 0, 0)
-    btn.BackgroundColor3 = (i == 1) and Color3.fromRGB(62, 39, 78) or Color3.fromRGB(102, 65, 129)
+    btn.BackgroundColor3 = (i == 1) and Color3.fromRGB(22, 1, 35) or Color3.fromRGB(22, 1, 35) -- 160123 داكن
+    btn.BackgroundTransparency = 0.2 -- تأثير الزجاج
     btn.Text = name
-    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220) -- رمادي فاتح
     btn.TextSize = 18
     btn.Font = Enum.Font.GothamBold
     btn.AutoButtonColor = false
     btn.Parent = tabsFrame
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 12)
+    
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 12)
+    
+    local btnStroke = Instance.new("UIStroke", btn)
+    btnStroke.Thickness = 2
+    btnStroke.Color = Color3.fromRGB(40, 40, 40)
+    
     tabButtons[name] = btn
 
     local content = Instance.new("Frame")
@@ -439,10 +479,12 @@ end
 for _, name in ipairs(tabNames) do
     tabButtons[name].MouseButton1Click:Connect(function()
         for k, b in pairs(tabButtons) do
-            b.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+            b.BackgroundColor3 = Color3.fromRGB(22, 1, 35) -- 160123
+            b.BackgroundTransparency = 0.2
             tabContents[k].Visible = false
         end
-        tabButtons[name].BackgroundColor3 = Color3.fromRGB(62, 39, 78)
+        tabButtons[name].BackgroundColor3 = Color3.fromRGB(28, 5, 45) -- أفتح قليلاً عند التحديد
+        tabButtons[name].BackgroundTransparency = 0.1
         tabContents[name].Visible = true
     end)
 end
@@ -450,75 +492,116 @@ end
 -- ==================== Locations Tab ====================
 local locContent = tabContents["Locations"]
 
-local minBtn = Instance.new("TextButton")
-minBtn.Size = UDim2.new(0.9, 0, 0, 70)
-minBtn.Position = UDim2.new(0.05, 0, 0, 20)
-minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-minBtn.Text = "Min Lobby"
-minBtn.TextColor3 = Color3.new(1,1,1)
-minBtn.TextSize = 30
-minBtn.Font = Enum.Font.GothamBold
-minBtn.Parent = locContent
-Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 14)
+local function createStyledButton(name, positionY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 70)
+    btn.Position = UDim2.new(0.05, 0, 0, positionY)
+    btn.BackgroundColor3 = Color3.fromRGB(22, 1, 35) -- 160123
+    btn.BackgroundTransparency = 0.2 -- تأثير الزجاج
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.TextSize = 30
+    btn.Font = Enum.Font.GothamBold
+    btn.AutoButtonColor = false
+    btn.Parent = locContent
+    
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0, 14)
+    
+    local btnStroke = Instance.new("UIStroke", btn)
+    btnStroke.Thickness = 2
+    btnStroke.Color = Color3.fromRGB(40, 40, 40)
+    
+    -- تأثير عند المرور بالمؤشر
+    btn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.1,
+            TextColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.2,
+            TextColor3 = Color3.fromRGB(220, 220, 220)
+        }):Play()
+    end)
+    
+    return btn
+end
 
-local maxBtn = Instance.new("TextButton")
-maxBtn.Size = UDim2.new(0.9, 0, 0, 70)
-maxBtn.Position = UDim2.new(0.05, 0, 0, 110)
-maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-maxBtn.Text = "Max"
-maxBtn.TextColor3 = Color3.new(1,1,1)
-maxBtn.TextSize = 30
-maxBtn.Font = Enum.Font.GothamBold
-maxBtn.Parent = locContent
-Instance.new("UICorner", maxBtn).CornerRadius = UDim.new(0, 14)
-
-local bookingBtn = Instance.new("TextButton")
-bookingBtn.Size = UDim2.new(0.9, 0, 0, 70)
-bookingBtn.Position = UDim2.new(0.05, 0, 0, 200)
-bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-bookingBtn.Text = "Booking"
-bookingBtn.TextColor3 = Color3.new(1,1,1)
-bookingBtn.TextSize = 30
-bookingBtn.Font = Enum.Font.GothamBold
-bookingBtn.Parent = locContent
-Instance.new("UICorner", bookingBtn).CornerRadius = UDim.new(0, 14)
+local minBtn = createStyledButton("Min Lobby", 20)
+local maxBtn = createStyledButton("Max", 110)
+local bookingBtn = createStyledButton("Booking", 200)
 
 minBtn.MouseButton1Click:Connect(function()
-    minBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
-    maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    minBtn.BackgroundColor3 = Color3.fromRGB(28, 5, 45)
+    minBtn.BackgroundTransparency = 0.1
+    maxBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    maxBtn.BackgroundTransparency = 0.2
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    bookingBtn.BackgroundTransparency = 0.2
     selectedLocation = "Min"
 end)
 
 maxBtn.MouseButton1Click:Connect(function()
-    maxBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
-    minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    maxBtn.BackgroundColor3 = Color3.fromRGB(28, 5, 45)
+    maxBtn.BackgroundTransparency = 0.1
+    minBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    minBtn.BackgroundTransparency = 0.2
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    bookingBtn.BackgroundTransparency = 0.2
     selectedLocation = "Max"
 end)
 
 bookingBtn.MouseButton1Click:Connect(function()
-    bookingBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
-    minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(28, 5, 45)
+    bookingBtn.BackgroundTransparency = 0.1
+    minBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    minBtn.BackgroundTransparency = 0.2
+    maxBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    maxBtn.BackgroundTransparency = 0.2
     selectedLocation = "Booking"
 end)
 
 local locSpawnBtn = Instance.new("TextButton")
 locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 60)
 locSpawnBtn.Position = UDim2.new(0.05, 0, 0, 290)
-locSpawnBtn.BackgroundColor3 = Color3.fromRGB(52, 50, 82)
+locSpawnBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35) -- 160123
+locSpawnBtn.BackgroundTransparency = 0.2
 locSpawnBtn.Text = "Spawn"
-locSpawnBtn.TextColor3 = Color3.new(1,1,1)
+locSpawnBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
 locSpawnBtn.TextSize = 30
 locSpawnBtn.Font = Enum.Font.GothamBold
+locSpawnBtn.AutoButtonColor = false
 locSpawnBtn.Parent = locContent
-Instance.new("UICorner", locSpawnBtn).CornerRadius = UDim.new(0, 14)
+
+local spawnCorner = Instance.new("UICorner", locSpawnBtn)
+spawnCorner.CornerRadius = UDim.new(0, 14)
+
+local spawnStroke = Instance.new("UIStroke", locSpawnBtn)
+spawnStroke.Thickness = 2
+spawnStroke.Color = Color3.fromRGB(40, 40, 40)
+
+-- تأثيرات الماوس لزر Spawn
+locSpawnBtn.MouseEnter:Connect(function()
+    game:GetService("TweenService"):Create(locSpawnBtn, TweenInfo.new(0.2), {
+        BackgroundTransparency = 0.1,
+        TextColor3 = Color3.fromRGB(255, 255, 255)
+    }):Play()
+end)
+
+locSpawnBtn.MouseLeave:Connect(function()
+    game:GetService("TweenService"):Create(locSpawnBtn, TweenInfo.new(0.2), {
+        BackgroundTransparency = 0.2,
+        TextColor3 = Color3.fromRGB(220, 220, 220)
+    }):Play()
+end)
 
 local locLoadingDot = Instance.new("Frame")
 locLoadingDot.Size = UDim2.new(0, 20, 0, 20)
 locLoadingDot.Position = UDim2.new(1, -30, 0.5, -10)
-locLoadingDot.BackgroundColor3 = Color3.fromHex("#22B365")
+locLoadingDot.BackgroundColor3 = Color3.fromRGB(43, 2, 69) -- 2b0245
 locLoadingDot.Visible = false
 locLoadingDot.Parent = locSpawnBtn
 Instance.new("UICorner", locLoadingDot).CornerRadius = UDim.new(1, 0)
@@ -549,6 +632,7 @@ local tpScroll = Instance.new("ScrollingFrame")
 tpScroll.Size = UDim2.new(1,0,1,0)
 tpScroll.BackgroundTransparency = 1
 tpScroll.ScrollBarThickness = 6
+tpScroll.ScrollBarImageColor3 = Color3.fromRGB(43, 2, 69)
 tpScroll.Parent = tpContent
 
 local tpList = Instance.new("UIListLayout")
@@ -556,17 +640,45 @@ tpList.Padding = UDim.new(0,8)
 tpList.Parent = tpScroll
 
 -- زر Keycard مع السهم والقائمة المنسدلة
-local keycardBtn = Instance.new("TextButton")
-keycardBtn.Size = UDim2.new(0.95,0,0,50)
+local function createStyledTPButton(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.95,0,0,50)
+    btn.BackgroundColor3 = Color3.fromRGB(22, 1, 35) -- 160123
+    btn.BackgroundTransparency = 0.2
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    btn.TextSize = 24
+    btn.Font = Enum.Font.Gotham
+    btn.AutoButtonColor = false
+    btn.Parent = tpScroll
+    
+    local btnCorner = Instance.new("UICorner", btn)
+    btnCorner.CornerRadius = UDim.new(0,10)
+    
+    local btnStroke = Instance.new("UIStroke", btn)
+    btnStroke.Thickness = 2
+    btnStroke.Color = Color3.fromRGB(40, 40, 40)
+    
+    -- تأثيرات الماوس
+    btn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.1,
+            TextColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.2,
+            TextColor3 = Color3.fromRGB(220, 220, 220)
+        }):Play()
+    end)
+    
+    return btn
+end
+
+local keycardBtn = createStyledTPButton("Keycard ▾")
 keycardBtn.Position = UDim2.new(0.025, 0, 0, 0)
-keycardBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-keycardBtn.Text = "Keycard ▾"
-keycardBtn.TextColor3 = Color3.new(1,1,1)
-keycardBtn.TextSize = 24
-keycardBtn.Font = Enum.Font.Gotham
-keycardBtn.AutoButtonColor = false
-keycardBtn.Parent = tpScroll
-Instance.new("UICorner", keycardBtn).CornerRadius = UDim.new(0,10)
 
 -- السهم الصغير
 local arrow = Instance.new("TextLabel")
@@ -574,7 +686,7 @@ arrow.Size = UDim2.new(0, 20, 0, 20)
 arrow.Position = UDim2.new(1, -30, 0.5, -10)
 arrow.BackgroundTransparency = 1
 arrow.Text = "▼"
-arrow.TextColor3 = Color3.new(1,1,1)
+arrow.TextColor3 = Color3.fromRGB(220, 220, 220)
 arrow.TextSize = 16
 arrow.Font = Enum.Font.GothamBold
 arrow.Parent = keycardBtn
@@ -583,15 +695,17 @@ arrow.Parent = keycardBtn
 local dropdownMenu = Instance.new("Frame")
 dropdownMenu.Size = UDim2.new(0.95, 0, 0, 160)
 dropdownMenu.Position = UDim2.new(0.025, 0, 0, 55)
-dropdownMenu.BackgroundColor3 = Color3.fromRGB(70, 45, 90)
+dropdownMenu.BackgroundColor3 = Color3.fromRGB(15, 0, 25)
+dropdownMenu.BackgroundTransparency = 0.1
 dropdownMenu.Visible = false
 dropdownMenu.Parent = tpScroll
-Instance.new("UICorner", dropdownMenu).CornerRadius = UDim.new(0,10)
 
-local dropdownStroke = Instance.new("UIStroke")
+local dropdownCorner = Instance.new("UICorner", dropdownMenu)
+dropdownCorner.CornerRadius = UDim.new(0,10)
+
+local dropdownStroke = Instance.new("UIStroke", dropdownMenu)
 dropdownStroke.Thickness = 2
-dropdownStroke.Color = Color3.fromRGB(0, 0, 0)
-dropdownStroke.Parent = dropdownMenu
+dropdownStroke.Color = Color3.fromRGB(43, 2, 69)
 
 local menuList = Instance.new("UIListLayout")
 menuList.Padding = UDim.new(0, 2)
@@ -610,14 +724,36 @@ for i, cardType in ipairs(keycardTypes) do
     local cardBtn = Instance.new("TextButton")
     cardBtn.Size = UDim2.new(0.95, 0, 0, 50)
     cardBtn.Position = UDim2.new(0.025, 0, 0, (i-1)*52)
-    cardBtn.BackgroundColor3 = Color3.fromRGB(90, 60, 110)
+    cardBtn.BackgroundColor3 = Color3.fromRGB(22, 1, 35)
+    cardBtn.BackgroundTransparency = 0.2
     cardBtn.Text = cardType
-    cardBtn.TextColor3 = Color3.new(1,1,1)
+    cardBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
     cardBtn.TextSize = 18
     cardBtn.Font = Enum.Font.Gotham
     cardBtn.AutoButtonColor = false
     cardBtn.Parent = dropdownMenu
-    Instance.new("UICorner", cardBtn).CornerRadius = UDim.new(0,8)
+    
+    local cardCorner = Instance.new("UICorner", cardBtn)
+    cardCorner.CornerRadius = UDim.new(0,8)
+    
+    local cardStroke = Instance.new("UIStroke", cardBtn)
+    cardStroke.Thickness = 2
+    cardStroke.Color = Color3.fromRGB(40, 40, 40)
+    
+    -- تأثيرات الماوس
+    cardBtn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(cardBtn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.1,
+            TextColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    end)
+    
+    cardBtn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(cardBtn, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.2,
+            TextColor3 = Color3.fromRGB(220, 220, 220)
+        }):Play()
+    end)
     
     cardBtn.MouseButton1Click:Connect(function()
         selectedKeycardType = cardType
@@ -648,16 +784,7 @@ end)
 
 -- إضافة بقية أزرار التيليبورت
 for _, tp in ipairs(teleportButtons) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.95,0,0,50)
-    btn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    btn.Text = tp.name
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 24
-    btn.Font = Enum.Font.Gotham
-    btn.AutoButtonColor = false
-    btn.Parent = tpScroll
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+    local btn = createStyledTPButton(tp.name)
 
     if tp.action == "gun" then
         btn.MouseButton1Click:Connect(function()
