@@ -6,6 +6,47 @@ local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 local camera = Workspace.CurrentCamera
 
+-- ===================================
+-- دالة تحميل الصورة المخصصة (تعمل في Synapse, Script-Ware, Fluxus, Comet, إلخ)
+-- ===================================
+local HttpRequest = (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request) or request or http_request
+
+local function LoadCustomImage(url, filename)
+    if not isfolder then
+        -- إذا لم تكن الدوال المتقدمة متوفرة، نستخدم رابط الصورة مباشرة
+        return url
+    end
+    
+    if not isfolder("MyGuiImages") then
+        makefolder("MyGuiImages")
+    end
+    
+    local path = "MyGuiImages/" .. filename
+    
+    if not isfile(path) then
+        local success, result = pcall(function()
+            local response = HttpRequest({Url = url, Method = "GET"})
+            if response and response.StatusCode == 200 then
+                writefile(path, response.Body)
+                return true
+            end
+            return false
+        end)
+        
+        if not success then
+            return url
+        end
+    end
+    
+    task.wait(0.1)  -- انتظار بسيط
+    
+    if getcustomasset then
+        return getcustomasset(path)
+    else
+        return url
+    end
+end
+
 -- متغيرات الحالة
 local selectedLocation = nil
 local isOnCooldownLocations = false
@@ -684,14 +725,20 @@ profileFrame.Position = UDim2.new(0.5, -50, 0, 20)
 profileFrame.BackgroundTransparency = 1
 profileFrame.Parent = playerContent
 
--- استخدم ImageLabel بدلاً من ImageButton للبروفايل
+-- استخدم رابط Roblox الرسمي لصورة البروفايل
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
 profileImage.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
--- استخدم رابط Roblox الرسمي
-profileImage.Image = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", player.UserId)
+profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- صورة افتراضية
 profileImage.Parent = profileFrame
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
+
+-- محاولة تحميل صورة البروفايل الحقيقية
+task.spawn(function()
+    local profileImageUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", player.UserId)
+    local customImage = LoadCustomImage(profileImageUrl, "profile.png")
+    profileImage.Image = customImage
+end)
 
 local profileStroke = Instance.new("UIStroke")
 profileStroke.Thickness = 3
@@ -713,41 +760,35 @@ gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 gridLayout.Parent = playerButtonsFrame
 
--- بيانات الأزرار مع Asset IDs
+-- بيانات الأزرار
 local playerButtonsData = {
     {
         name = "Metal",
-        imageId = 13325345678, -- ID افتراضي، يمكن تغييره
+        imageUrl = "https://i.imgur.com/hZXn5h7.png",
+        filename = "metal.png",
         selected = false
     },
     {
         name = "Button 2",
-        imageId = 0,
+        imageUrl = "",
+        filename = "button2.png",
         selected = false
     },
     {
         name = "Button 3",
-        imageId = 0,
+        imageUrl = "",
+        filename = "button3.png",
         selected = false
     },
     {
         name = "Button 4",
-        imageId = 0,
+        imageUrl = "",
+        filename = "button4.png",
         selected = false
     }
 }
 
 local playerButtons = {}
-
--- دالة لتحميل الصورة باستخدام Asset ID
-local function loadImageWithAssetId(imageLabel, assetId)
-    if assetId and assetId ~= 0 then
-        imageLabel.Image = "rbxassetid://" .. assetId
-    else
-        imageLabel.Image = ""
-        imageLabel.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    end
-end
 
 -- دالة لتحديث مظهر الدائرة
 local function updateSelectionCircle(circle, selected)
@@ -773,8 +814,13 @@ for i, buttonData in ipairs(playerButtonsData) do
     button.Parent = buttonContainer
     Instance.new("UICorner", button).CornerRadius = UDim.new(0.2, 0)
     
-    -- تحميل الصورة باستخدام Asset ID
-    loadImageWithAssetId(button, buttonData.imageId)
+    -- تحميل الصورة باستخدام الدالة المخصصة
+    if buttonData.imageUrl and buttonData.imageUrl ~= "" then
+        task.spawn(function()
+            local customImage = LoadCustomImage(buttonData.imageUrl, buttonData.filename)
+            button.Image = customImage
+        end)
+    end
     
     -- الدائرة في الزاوية اليمنى العليا
     local selectionCircle = Instance.new("Frame")
