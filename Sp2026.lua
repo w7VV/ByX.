@@ -407,7 +407,7 @@ local function stealKeycard()
 end
 
 -- ===================================
--- إنشاء الواجهة الرسومية (220x500)
+-- إنشاء الواجهة الرسومية
 -- ===================================
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GunSpawnerUI"
@@ -416,249 +416,223 @@ screenGui.Parent = PlayerGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 220, 0, 500)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -250)
-mainFrame.BackgroundColor3 = Color3.fromHex("#061733")
-mainFrame.BackgroundTransparency = 0.2
+mainFrame.Size = UDim2.new(0, 300, 0, 420) -- تصغير الحجم (كان 360×500)
+mainFrame.Position = UDim2.new(0, 20, 0.5, -210) -- تعديل المركز
+mainFrame.BackgroundColor3 = Color3.new(1, 1, 1)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 14) -- تصغير الزوايا
 
-local mainGradient = Instance.new("UIGradient")
-mainGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromHex("#061733")),
-    ColorSequenceKeypoint.new(1, Color3.fromHex("#075bb4"))
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(52, 50, 82)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(35, 22, 44)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 12, 19))
 })
-mainGradient.Rotation = 90
-mainGradient.Parent = mainFrame
+gradient.Rotation = 0
+gradient.Parent = mainFrame
 
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 1
-mainStroke.Color = Color3.fromHex("#075bb4")
+mainStroke.Thickness = 2 -- تصغير السماكة
+mainStroke.Color = Color3.fromRGB(0, 0, 0)
 mainStroke.Parent = mainFrame
 
--- Header
-local headerFrame = Instance.new("Frame")
-headerFrame.Size = UDim2.new(1, 0, 0, 35)
-headerFrame.BackgroundColor3 = Color3.fromHex("#061733")
-headerFrame.BackgroundTransparency = 0.4
-headerFrame.BorderSizePixel = 0
-headerFrame.Parent = mainFrame
+-- التبويبات
+local tabNames = {"Locations", "Teleport", "Player"}
+local tabButtons = {}
+local tabContents = {}
 
-local headerGradient = Instance.new("UIGradient")
-headerGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromHex("#061733")),
-    ColorSequenceKeypoint.new(1, Color3.fromHex("#075bb4"))
-})
-headerGradient.Rotation = 90
-headerGradient.Parent = headerFrame
+local tabsFrame = Instance.new("Frame")
+tabsFrame.Size = UDim2.new(0.9, 0, 0, 40) -- تصغير الارتفاع
+tabsFrame.Position = UDim2.new(0.05, 0, 0, 15) -- تعديل الموضع
+tabsFrame.BackgroundTransparency = 1
+tabsFrame.Parent = mainFrame
 
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0, 140, 0, 18)
-titleLabel.Position = UDim2.new(0, 10, 0, 8)
-titleLabel.Text = "GUN SPAWNER UI"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 13
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.BackgroundTransparency = 1
-titleLabel.Parent = headerFrame
+local tabPadding = 4
+local totalWidth = 300 * 0.9
+local buttonWidth = (totalWidth - (#tabNames - 1) * tabPadding) / #tabNames
 
--- Content Frame
-local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, 0, 1, -35)
-contentFrame.Position = UDim2.new(0, 0, 0, 35)
-contentFrame.BackgroundColor3 = Color3.fromHex("#061733")
-contentFrame.BackgroundTransparency = 0.5
-contentFrame.BorderSizePixel = 0
-contentFrame.Parent = mainFrame
+for i, name in ipairs(tabNames) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, buttonWidth, 1, 0)
+    btn.Position = UDim2.new(0, (i-1) * (buttonWidth + tabPadding), 0, 0)
+    btn.BackgroundColor3 = (i == 1) and Color3.fromRGB(62, 39, 78) or Color3.fromRGB(102, 65, 129)
+    btn.Text = name
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.TextSize = 15 -- تصغير حجم النص
+    btn.Font = Enum.Font.GothamBold
+    btn.AutoButtonColor = false
+    btn.Parent = tabsFrame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10) -- تصغير الزوايا
+    tabButtons[name] = btn
 
--- Scrolling Frame الرئيسي لكل المحتوى
-local mainScroll = Instance.new("ScrollingFrame")
-mainScroll.Size = UDim2.new(1, 0, 1, 0)
-mainScroll.BackgroundTransparency = 1
-mainScroll.BorderSizePixel = 0
-mainScroll.ScrollBarThickness = 6
-mainScroll.ScrollBarImageColor3 = Color3.fromHex("#075bb4")
-mainScroll.Parent = contentFrame
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(0.9, 0, 0, 350) -- تصغير الارتفاع
+    content.Position = UDim2.new(0.05, 0, 0, 65) -- تعديل الموضع
+    content.BackgroundTransparency = 1
+    content.Visible = (i == 1)
+    content.Parent = mainFrame
+    tabContents[name] = content
+end
 
-local mainList = Instance.new("UIListLayout")
-mainList.Padding = UDim.new(0, 10)
-mainList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-mainList.SortOrder = Enum.SortOrder.LayoutOrder
-mainList.Parent = mainScroll
+for _, name in ipairs(tabNames) do
+    tabButtons[name].MouseButton1Click:Connect(function()
+        for k, b in pairs(tabButtons) do
+            b.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+            tabContents[k].Visible = false
+        end
+        tabButtons[name].BackgroundColor3 = Color3.fromRGB(62, 39, 78)
+        tabContents[name].Visible = true
+    end)
+end
 
-mainList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    mainScroll.CanvasSize = UDim2.new(0, 0, 0, mainList.AbsoluteContentSize.Y + 20)
-end)
-
--- ==================== Locations Section ====================
-local locSection = Instance.new("Frame")
-locSection.Size = UDim2.new(1, -10, 0, 180)
-locSection.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-locSection.BackgroundTransparency = 0.65
-locSection.LayoutOrder = 1
-locSection.Parent = mainScroll
-
-local locSectionTitle = Instance.new("TextLabel")
-locSectionTitle.Size = UDim2.new(1, 0, 0, 30)
-locSectionTitle.Position = UDim2.new(0, 0, 0, 5)
-locSectionTitle.Text = "LOCATIONS"
-locSectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-locSectionTitle.Font = Enum.Font.GothamBold
-locSectionTitle.TextSize = 18
-locSectionTitle.BackgroundTransparency = 1
-locSectionTitle.Parent = locSection
-
-local locGrid = Instance.new("UIGridLayout")
-locGrid.CellSize = UDim2.new(1, -10, 0, 35)
-locGrid.CellPadding = UDim2.new(0, 0, 0, 8)
-locGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-locGrid.VerticalAlignment = Enum.VerticalAlignment.Top
-locGrid.Parent = locSection
+-- ==================== Locations Tab ====================
+local locContent = tabContents["Locations"]
 
 local minBtn = Instance.new("TextButton")
-minBtn.Size = UDim2.new(0.9, 0, 0, 35)
-minBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-minBtn.BackgroundTransparency = 0.65
+minBtn.Size = UDim2.new(0.9, 0, 0, 55) -- تصغير الارتفاع
+minBtn.Position = UDim2.new(0.05, 0, 0, 15)
+minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
 minBtn.Text = "Min Lobby"
 minBtn.TextColor3 = Color3.new(1,1,1)
-minBtn.TextSize = 16
+minBtn.TextSize = 22 -- تصغير حجم النص
 minBtn.Font = Enum.Font.GothamBold
-minBtn.Parent = locSection
-minBtn.LayoutOrder = 1
+minBtn.Parent = locContent
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 12) -- تصغير الزوايا
 
 local maxBtn = Instance.new("TextButton")
-maxBtn.Size = UDim2.new(0.9, 0, 0, 35)
-maxBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-maxBtn.BackgroundTransparency = 0.65
+maxBtn.Size = UDim2.new(0.9, 0, 0, 55)
+maxBtn.Position = UDim2.new(0.05, 0, 0, 85)
+maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
 maxBtn.Text = "Max"
 maxBtn.TextColor3 = Color3.new(1,1,1)
-maxBtn.TextSize = 16
+maxBtn.TextSize = 22
 maxBtn.Font = Enum.Font.GothamBold
-maxBtn.Parent = locSection
-maxBtn.LayoutOrder = 2
+maxBtn.Parent = locContent
+Instance.new("UICorner", maxBtn).CornerRadius = UDim.new(0, 12)
 
 local bookingBtn = Instance.new("TextButton")
-bookingBtn.Size = UDim2.new(0.9, 0, 0, 35)
-bookingBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-bookingBtn.BackgroundTransparency = 0.65
+bookingBtn.Size = UDim2.new(0.9, 0, 0, 55)
+bookingBtn.Position = UDim2.new(0.05, 0, 0, 155)
+bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
 bookingBtn.Text = "Booking"
 bookingBtn.TextColor3 = Color3.new(1,1,1)
-bookingBtn.TextSize = 16
+bookingBtn.TextSize = 22
 bookingBtn.Font = Enum.Font.GothamBold
-bookingBtn.Parent = locSection
-bookingBtn.LayoutOrder = 3
+bookingBtn.Parent = locContent
+Instance.new("UICorner", bookingBtn).CornerRadius = UDim.new(0, 12)
+
+minBtn.MouseButton1Click:Connect(function()
+    minBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
+    maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    selectedLocation = "Min"
+end)
+
+maxBtn.MouseButton1Click:Connect(function()
+    maxBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
+    minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    selectedLocation = "Max"
+end)
+
+bookingBtn.MouseButton1Click:Connect(function()
+    bookingBtn.BackgroundColor3 = Color3.fromRGB(62, 39, 78)
+    minBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    maxBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    selectedLocation = "Booking"
+end)
 
 local locSpawnBtn = Instance.new("TextButton")
-locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 40)
-locSpawnBtn.BackgroundColor3 = Color3.fromHex("#075bb4")
-locSpawnBtn.BackgroundTransparency = 0.5
-locSpawnBtn.Text = "SPAWN"
+locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 45) -- تصغير الارتفاع
+locSpawnBtn.Position = UDim2.new(0.05, 0, 0, 225)
+locSpawnBtn.BackgroundColor3 = Color3.fromRGB(52, 50, 82)
+locSpawnBtn.Text = "Spawn"
 locSpawnBtn.TextColor3 = Color3.new(1,1,1)
-locSpawnBtn.TextSize = 18
+locSpawnBtn.TextSize = 24 -- تصغير حجم النص
 locSpawnBtn.Font = Enum.Font.GothamBold
-locSpawnBtn.Parent = locSection
-locSpawnBtn.LayoutOrder = 4
+locSpawnBtn.Parent = locContent
+Instance.new("UICorner", locSpawnBtn).CornerRadius = UDim.new(0, 12)
 
 local locLoadingDot = Instance.new("Frame")
-locLoadingDot.Size = UDim2.new(0, 12, 0, 12)
-locLoadingDot.Position = UDim2.new(1, -25, 0.5, -6)
+locLoadingDot.Size = UDim2.new(0, 16, 0, 16) -- تصغير الحجم
+locLoadingDot.Position = UDim2.new(1, -28, 0.5, -8) -- تعديل الموضع
 locLoadingDot.BackgroundColor3 = Color3.fromHex("#22B365")
 locLoadingDot.Visible = false
 locLoadingDot.Parent = locSpawnBtn
 Instance.new("UICorner", locLoadingDot).CornerRadius = UDim.new(1, 0)
 
-minBtn.MouseButton1Click:Connect(function()
-    minBtn.BackgroundColor3 = Color3.fromHex("#075bb4")
-    maxBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    bookingBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    selectedLocation = "Min"
-end)
+-- ==================== Teleport Tab ====================
+local tpContent = tabContents["Teleport"]
 
-maxBtn.MouseButton1Click:Connect(function()
-    maxBtn.BackgroundColor3 = Color3.fromHex("#075bb4")
-    minBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    bookingBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    selectedLocation = "Max"
-end)
-
-bookingBtn.MouseButton1Click:Connect(function()
-    bookingBtn.BackgroundColor3 = Color3.fromHex("#075bb4")
-    minBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    maxBtn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    selectedLocation = "Booking"
-end)
-
--- ==================== Teleport Section ====================
-local tpSection = Instance.new("Frame")
-tpSection.Size = UDim2.new(1, -10, 0, 350)
-tpSection.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-tpSection.BackgroundTransparency = 0.65
-tpSection.LayoutOrder = 2
-tpSection.Parent = mainScroll
-
-local tpSectionTitle = Instance.new("TextLabel")
-tpSectionTitle.Size = UDim2.new(1, 0, 0, 30)
-tpSectionTitle.Position = UDim2.new(0, 0, 0, 5)
-tpSectionTitle.Text = "TELEPORT"
-tpSectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpSectionTitle.Font = Enum.Font.GothamBold
-tpSectionTitle.TextSize = 18
-tpSectionTitle.BackgroundTransparency = 1
-tpSectionTitle.Parent = tpSection
+local teleportButtons = {
+    {name = "Gun", action = "gun"},
+    {name = "Maintenance", pos = CFrame.new(172.34, 23.10, -143.87)},
+    {name = "Security", pos = CFrame.new(224.47, 23.10, -167.90)},
+    {name = "OC Lockers", pos = CFrame.new(137.60, 23.10, -169.93)},
+    {name = "RIOT Lockers", pos = CFrame.new(165.63, 23.10, -192.25)},
+    {name = "Ventilation", pos = CFrame.new(76.96, -7.02, -19.21)},
+    {name = "Maximum", pos = CFrame.new(99.85, -8.87, -156.13)},
+    {name = "Generator", pos = CFrame.new(100.95, -8.82, -57.59)},
+    {name = "Outside", pos = CFrame.new(350.22, 5.40, -171.09)},
+    {name = "Escape Base", pos = CFrame.new(749.02, -0.97, -470.45)},
+    {name = "Escape", pos = CFrame.new(307.06, 5.40, -177.88)},
+    {name = "Keycard (💳)", pos = CFrame.new(-13.36, 22.13, -27.47)},
+    {name = "GAS STATION", pos = CFrame.new(274.30, 6.21, -612.77)},
+    {name = "armory", pos = CFrame.new(189.40, 23.10, -214.47)},
+    {name = "BARN", pos = CFrame.new(43.68, 10.37, 395.04)},
+    {name = "R&D", pos = CFrame.new(-182.35, -85.90, 158.07)}
+}
 
 local tpScroll = Instance.new("ScrollingFrame")
-tpScroll.Size = UDim2.new(1, -10, 0, 300)
-tpScroll.Position = UDim2.new(0, 5, 0, 35)
+tpScroll.Size = UDim2.new(1,0,1,0)
 tpScroll.BackgroundTransparency = 1
-tpScroll.ScrollBarThickness = 6
-tpScroll.ScrollBarImageColor3 = Color3.fromHex("#075bb4")
-tpScroll.Parent = tpSection
+tpScroll.ScrollBarThickness = 5 -- تصغير السماكة
+tpScroll.Parent = tpContent
 
 local tpList = Instance.new("UIListLayout")
-tpList.Padding = UDim.new(0, 8)
-tpList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tpList.Padding = UDim.new(0,6) -- تقليل المسافة
 tpList.Parent = tpScroll
 
-tpList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    tpScroll.CanvasSize = UDim2.new(0, 0, 0, tpList.AbsoluteContentSize.Y + 10)
-end)
-
--- زر Keycard مع القائمة المنسدلة
-local keycardContainer = Instance.new("Frame")
-keycardContainer.Size = UDim2.new(0.95, 0, 0, 35)
-keycardContainer.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-keycardContainer.BackgroundTransparency = 0.65
-keycardContainer.Parent = tpScroll
-
+-- زر Keycard مع السهم والقائمة المنسدلة
 local keycardBtn = Instance.new("TextButton")
-keycardBtn.Size = UDim2.new(1, 0, 1, 0)
-keycardBtn.BackgroundTransparency = 1
-keycardBtn.Text = "KEYCARD ▾"
+keycardBtn.Size = UDim2.new(0.95,0,0,40) -- تصغير الارتفاع
+keycardBtn.Position = UDim2.new(0.025, 0, 0, 0)
+keycardBtn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+keycardBtn.Text = "Keycard ▾"
 keycardBtn.TextColor3 = Color3.new(1,1,1)
-keycardBtn.TextSize = 16
-keycardBtn.Font = Enum.Font.GothamBold
+keycardBtn.TextSize = 18 -- تصغير حجم النص
+keycardBtn.Font = Enum.Font.Gotham
 keycardBtn.AutoButtonColor = false
-keycardBtn.Parent = keycardContainer
+keycardBtn.Parent = tpScroll
+Instance.new("UICorner", keycardBtn).CornerRadius = UDim.new(0,8)
 
+-- السهم الصغير
 local arrow = Instance.new("TextLabel")
-arrow.Size = UDim2.new(0, 20, 0, 20)
-arrow.Position = UDim2.new(1, -25, 0.5, -10)
+arrow.Size = UDim2.new(0, 16, 0, 16) -- تصغير الحجم
+arrow.Position = UDim2.new(1, -25, 0.5, -8) -- تعديل الموضع
 arrow.BackgroundTransparency = 1
 arrow.Text = "▼"
 arrow.TextColor3 = Color3.new(1,1,1)
-arrow.TextSize = 12
+arrow.TextSize = 12 -- تصغير حجم النص
 arrow.Font = Enum.Font.GothamBold
-arrow.Parent = keycardContainer
+arrow.Parent = keycardBtn
 
+-- القائمة المنسدلة (مخفية في البداية)
 local dropdownMenu = Instance.new("Frame")
-dropdownMenu.Size = UDim2.new(0.95, 0, 0, 120)
-dropdownMenu.Position = UDim2.new(0, 2.5, 1, 5)
-dropdownMenu.BackgroundColor3 = Color3.fromHex("#061733")
+dropdownMenu.Size = UDim2.new(0.95, 0, 0, 130) -- تصغير الارتفاع
+dropdownMenu.Position = UDim2.new(0.025, 0, 0, 45) -- تعديل الموضع
+dropdownMenu.BackgroundColor3 = Color3.fromRGB(70, 45, 90)
 dropdownMenu.Visible = false
-dropdownMenu.Parent = keycardContainer
+dropdownMenu.Parent = tpScroll
+Instance.new("UICorner", dropdownMenu).CornerRadius = UDim.new(0,8)
+
+local dropdownStroke = Instance.new("UIStroke")
+dropdownStroke.Thickness = 1.5 -- تصغير السماكة
+dropdownStroke.Color = Color3.fromRGB(0, 0, 0)
+dropdownStroke.Parent = dropdownMenu
 
 local menuList = Instance.new("UIListLayout")
 menuList.Padding = UDim.new(0, 2)
@@ -671,26 +645,31 @@ local keycardTypes = {
     "Corrections Keycard"
 }
 
+local keycardButtons = {}
+
 for i, cardType in ipairs(keycardTypes) do
     local cardBtn = Instance.new("TextButton")
-    cardBtn.Size = UDim2.new(1, 0, 0, 38)
-    cardBtn.BackgroundColor3 = Color3.fromHex("#075bb4")
-    cardBtn.BackgroundTransparency = 0.5
+    cardBtn.Size = UDim2.new(0.95, 0, 0, 40) -- تصغير الارتفاع
+    cardBtn.Position = UDim2.new(0.025, 0, 0, (i-1)*42)
+    cardBtn.BackgroundColor3 = Color3.fromRGB(90, 60, 110)
     cardBtn.Text = cardType
     cardBtn.TextColor3 = Color3.new(1,1,1)
-    cardBtn.TextSize = 14
+    cardBtn.TextSize = 15 -- تصغير حجم النص
     cardBtn.Font = Enum.Font.Gotham
     cardBtn.AutoButtonColor = false
     cardBtn.Parent = dropdownMenu
+    Instance.new("UICorner", cardBtn).CornerRadius = UDim.new(0,6)
     
     cardBtn.MouseButton1Click:Connect(function()
         selectedKeycardType = cardType
-        keycardBtn.Text = "KEYCARD: " .. cardType .. " ▾"
+        keycardBtn.Text = "Keycard: " .. cardType .. " ▾"
         dropdownMenu.Visible = false
-        arrow.Text = "▼"
         
+        -- بدء عملية السرقة
         pcall(stealKeycard)
     end)
+    
+    table.insert(keycardButtons, cardBtn)
 end
 
 -- التحكم في فتح/إغلاق القائمة المنسدلة
@@ -700,42 +679,26 @@ keycardBtn.MouseButton1Click:Connect(function()
     dropdownMenu.Visible = isDropdownOpen
     
     if isDropdownOpen then
+        keycardBtn.Text = "Keycard ▴"
         arrow.Text = "▲"
     else
+        keycardBtn.Text = selectedKeycardType and ("Keycard: " .. selectedKeycardType .. " ▾") or "Keycard ▾"
         arrow.Text = "▼"
     end
 end)
 
--- أزرار التيليبورت الأساسية
-local teleportButtons = {
-    {name = "GUN", action = "gun"},
-    {name = "MAINTENANCE", pos = CFrame.new(172.34, 23.10, -143.87)},
-    {name = "SECURITY", pos = CFrame.new(224.47, 23.10, -167.90)},
-    {name = "OC LOCKERS", pos = CFrame.new(137.60, 23.10, -169.93)},
-    {name = "RIOT LOCKERS", pos = CFrame.new(165.63, 23.10, -192.25)},
-    {name = "VENTILATION", pos = CFrame.new(76.96, -7.02, -19.21)},
-    {name = "MAXIMUM", pos = CFrame.new(99.85, -8.87, -156.13)},
-    {name = "GENERATOR", pos = CFrame.new(100.95, -8.82, -57.59)},
-    {name = "OUTSIDE", pos = CFrame.new(350.22, 5.40, -171.09)},
-    {name = "ESCAPE BASE", pos = CFrame.new(749.02, -0.97, -470.45)},
-    {name = "ESCAPE", pos = CFrame.new(307.06, 5.40, -177.88)},
-    {name = "GAS STATION", pos = CFrame.new(274.30, 6.21, -612.77)},
-    {name = "ARMORY", pos = CFrame.new(189.40, 23.10, -214.47)},
-    {name = "BARN", pos = CFrame.new(43.68, 10.37, 395.04)},
-    {name = "R&D", pos = CFrame.new(-182.35, -85.90, 158.07)}
-}
-
-for i, tp in ipairs(teleportButtons) do
+-- إضافة بقية أزرار التيليبورت
+for _, tp in ipairs(teleportButtons) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.95, 0, 0, 35)
-    btn.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-    btn.BackgroundTransparency = 0.65
+    btn.Size = UDim2.new(0.95,0,0,40) -- تصغير الارتفاع
+    btn.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
     btn.Text = tp.name
     btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 16
+    btn.TextSize = 18 -- تصغير حجم النص
     btn.Font = Enum.Font.Gotham
     btn.AutoButtonColor = false
     btn.Parent = tpScroll
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 
     if tp.action == "gun" then
         btn.MouseButton1Click:Connect(function()
@@ -750,64 +713,67 @@ for i, tp in ipairs(teleportButtons) do
     end
 end
 
--- ==================== Player Section ====================
-local playerSection = Instance.new("Frame")
-playerSection.Size = UDim2.new(1, -10, 0, 280)
-playerSection.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-playerSection.BackgroundTransparency = 0.65
-playerSection.LayoutOrder = 3
-playerSection.Parent = mainScroll
+tpScroll.CanvasSize = UDim2.new(0,0,0,(#teleportButtons + 1) * 46 + 130)
 
-local playerSectionTitle = Instance.new("TextLabel")
-playerSectionTitle.Size = UDim2.new(1, 0, 0, 30)
-playerSectionTitle.Position = UDim2.new(0, 0, 0, 5)
-playerSectionTitle.Text = "PLAYER"
-playerSectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-playerSectionTitle.Font = Enum.Font.GothamBold
-playerSectionTitle.TextSize = 18
-playerSectionTitle.BackgroundTransparency = 1
-playerSectionTitle.Parent = playerSection
+-- ==================== Player Tab ====================
+local playerContent = tabContents["Player"]
 
--- صورة البروفايل
-local profileContainer = Instance.new("Frame")
-profileContainer.Size = UDim2.new(0, 70, 0, 70)
-profileContainer.Position = UDim2.new(0.5, -35, 0, 40)
-profileContainer.BackgroundTransparency = 1
-profileContainer.Parent = playerSection
+-- صورة البروفايل الدائرية
+local profileFrame = Instance.new("Frame")
+profileFrame.Size = UDim2.new(0, 80, 0, 80) -- تصغير الحجم
+profileFrame.Position = UDim2.new(0.5, -40, 0, 15) -- تعديل الموضع
+profileFrame.BackgroundTransparency = 1
+profileFrame.Parent = playerContent
 
+-- محاولة تحميل صورة البروفايل باستخدام رابط Roblox
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
-profileImage.BackgroundColor3 = Color3.fromHex("#0a2a5a")
-profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-profileImage.Parent = profileContainer
+profileImage.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- صورة افتراضية
+profileImage.Parent = profileFrame
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
 
+-- تحميل صورة البروفايل الحقيقية
 task.spawn(function()
     local userId = player.UserId
-    local alternativeUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", userId)
-    local customImage = LoadCustomImage(alternativeUrl, "profile_" .. userId .. ".png")
-    profileImage.Image = customImage
+    local success, result = pcall(function()
+        -- طريقة مباشرة لتحميل صورة البروفايل
+        local thumbnailType = Enum.ThumbnailType.HeadShot
+        local thumbnailSize = Enum.ThumbnailSize.Size420x420
+        local content, isReady = Players:GetUserThumbnailAsync(userId, thumbnailType, thumbnailSize)
+        return content
+    end)
+    
+    if success and result then
+        profileImage.Image = result
+    else
+        -- إذا فشلت الطريقة الأولى، جرب رابط البديل
+        local alternativeUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", userId)
+        local customImage = LoadCustomImage(alternativeUrl, "profile_" .. userId .. ".png")
+        profileImage.Image = customImage
+    end
 end)
 
--- ScrollingFrame لأزرار اللاعب
+local profileStroke = Instance.new("UIStroke")
+profileStroke.Thickness = 2 -- تصغير السماكة
+profileStroke.Color = Color3.fromRGB(62, 39, 78)
+profileStroke.Parent = profileImage
+
+-- ScrollingFrame للأزرار
 local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Size = UDim2.new(1, -10, 0, 170)
-playerScroll.Position = UDim2.new(0, 5, 0, 120)
+playerScroll.Size = UDim2.new(1, 0, 0, 240) -- تصغير الارتفاع
+playerScroll.Position = UDim2.new(0, 0, 0, 110) -- تعديل الموضع
 playerScroll.BackgroundTransparency = 1
-playerScroll.ScrollBarThickness = 6
-playerScroll.ScrollBarImageColor3 = Color3.fromHex("#075bb4")
-playerScroll.Parent = playerSection
+playerScroll.ScrollBarThickness = 5 -- تصغير السماكة
+playerScroll.Parent = playerContent
 
-local playerGrid = Instance.new("UIGridLayout")
-playerGrid.CellSize = UDim2.new(0.45, 0, 0, 80)
-playerGrid.CellPadding = UDim2.new(0.05, 0, 0.05, 0)
-playerGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-playerGrid.VerticalAlignment = Enum.VerticalAlignment.Top
-playerGrid.Parent = playerScroll
-
-playerGrid:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    playerScroll.CanvasSize = UDim2.new(0, 0, 0, playerGrid.AbsoluteContentSize.Y + 10)
-end)
+-- GridLayout داخل الـ ScrollingFrame
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.new(0.45, 0, 0, 100) -- تصغير ارتفاع الخلية
+gridLayout.CellPadding = UDim2.new(0.05, 0, 0.05, 0)
+gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+gridLayout.Parent = playerScroll
 
 -- بيانات الأزرار
 local playerButtonsData = {
@@ -842,13 +808,13 @@ local playerButtons = {}
 -- دالة لتحديث مظهر الدائرة
 local function updateSelectionCircle(circle, stroke, selected)
     if selected then
-        circle.BackgroundColor3 = Color3.fromHex("#22B365")
-        circle.BackgroundTransparency = 0
-        stroke.Transparency = 1
+        circle.BackgroundColor3 = Color3.fromHex("#22B365") -- أخضر
+        circle.BackgroundTransparency = 0 -- معبأة
+        stroke.Transparency = 1 -- إخفاء الحدود
     else
-        circle.BackgroundColor3 = Color3.fromHex("#22B365")
-        circle.BackgroundTransparency = 1
-        stroke.Transparency = 0
+        circle.BackgroundColor3 = Color3.fromHex("#22B365") -- نفس اللون
+        circle.BackgroundTransparency = 1 -- فارغة
+        stroke.Transparency = 0 -- إظهار الحدود
     end
 end
 
@@ -860,13 +826,13 @@ for i, buttonData in ipairs(playerButtonsData) do
     buttonContainer.Parent = playerScroll
     
     local button = Instance.new("ImageButton")
-    button.Size = UDim2.new(0.8, 0, 0.65, 0)
-    button.Position = UDim2.new(0.1, 0, 0.05, 0)
-    button.BackgroundTransparency = 1
+    button.Size = UDim2.new(0.85, 0, 0.7, 0) -- تصغير الحجم
+    button.Position = UDim2.new(0.075, 0, 0.05, 0)
+    button.BackgroundTransparency = 1 -- بدون خلفية
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
     
-    -- تحميل الصورة
+    -- تحميل الصورة باستخدام الدالة المخصصة
     if buttonData.imageUrl and buttonData.imageUrl ~= "" then
         task.spawn(function()
             local customImage = LoadCustomImage(buttonData.imageUrl, buttonData.filename)
@@ -874,34 +840,36 @@ for i, buttonData in ipairs(playerButtonsData) do
         end)
     end
     
-    -- الدائرة
+    -- إطار الدائرة في الزاوية اليمنى العليا
     local circleContainer = Instance.new("Frame")
-    circleContainer.Size = UDim2.new(0, 12, 0, 12)
-    circleContainer.Position = UDim2.new(0.85, -6, 0.05, -6)
+    circleContainer.Size = UDim2.new(0, 10, 0, 10) -- تصغير الحجم
+    circleContainer.Position = UDim2.new(0.85, -5, 0.05, -5) -- تحريك لليمين أكثر
     circleContainer.BackgroundTransparency = 1
     circleContainer.Parent = button
     
+    -- الدائرة نفسها
     local selectionCircle = Instance.new("Frame")
     selectionCircle.Size = UDim2.new(1, 0, 1, 0)
     selectionCircle.BackgroundColor3 = Color3.fromHex("#22B365")
-    selectionCircle.BackgroundTransparency = 1
+    selectionCircle.BackgroundTransparency = 1 -- فارغة في البداية
     selectionCircle.Parent = circleContainer
     Instance.new("UICorner", selectionCircle).CornerRadius = UDim.new(1, 0)
     
+    -- حدود الدائرة
     local circleStroke = Instance.new("UIStroke")
-    circleStroke.Thickness = 1.5
-    circleStroke.Color = Color3.fromHex("#22B365")
-    circleStroke.Transparency = 0
+    circleStroke.Thickness = 1.2 -- تصغير السماكة
+    circleStroke.Color = Color3.fromHex("#22B365") -- نفس اللون الأخضر
+    circleStroke.Transparency = 0 -- ظاهرة في البداية
     circleStroke.Parent = selectionCircle
     
-    -- النص
+    -- النص تحت الزر
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0.2, 0)
-    label.Position = UDim2.new(0, 0, 0.8, 0)
+    label.Position = UDim2.new(0, 0, 0.75, 0)
     label.BackgroundTransparency = 1
     label.Text = buttonData.name
     label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextSize = 12
+    label.TextSize = 12 -- تصغير حجم النص
     label.Font = Enum.Font.GothamBold
     label.Parent = buttonContainer
     
@@ -916,20 +884,26 @@ for i, buttonData in ipairs(playerButtonsData) do
     
     -- حدث النقر
     button.MouseButton1Click:Connect(function()
+        -- إلغاء تحديد جميع الأزرار الأخرى
         for j, btn in ipairs(playerButtons) do
             btn.data.selected = (j == i)
             updateSelectionCircle(btn.circle, btn.stroke, btn.data.selected)
         end
         
+        -- إشعار عند النقر على الزر
         game.StarterGui:SetCore("SendNotification", {
             Title = buttonData.name,
-            Text = buttonData.name .. " selected!",
+            Text = buttonData.name .. " button selected!",
             Duration = 2
         })
     end)
     
+    -- تحديث مظهر الدائرة
     updateSelectionCircle(selectionCircle, circleStroke, buttonData.selected)
 end
+
+-- تعديل حجم الـ ScrollingFrame بناءً على عدد الأزرار
+playerScroll.CanvasSize = UDim2.new(0, 0, 0, gridLayout.AbsoluteContentSize.Y)
 
 -- ===================================
 -- دالة الدروب النهائية
@@ -1020,6 +994,14 @@ local function RunMin() RunDrop(MinDropCFrame, MinCamDropPos, MinArmoryPos) end
 local function RunMax() RunDrop(MaxDropCFrame, MaxCamDropPos, MaxArmoryPos) end
 local function RunBooking() RunDrop(BookingDropCFrame, BookingCamDropPos, MaxArmoryPos) end
 
+local function executeSelected(tabType)
+    if tabType == "Locations" and selectedLocation then
+        if selectedLocation == "Min" then RunMin()
+        elseif selectedLocation == "Max" then RunMax()
+        elseif selectedLocation == "Booking" then RunBooking() end
+    end
+end
+
 local function startLoadingAnimation(dot)
     dot.Visible = true
     local tween = TweenService:Create(dot, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {Transparency = 1})
@@ -1027,31 +1009,21 @@ local function startLoadingAnimation(dot)
     return tween
 end
 
-local function startCooldown()
-    local tween = startLoadingAnimation(locLoadingDot)
+local function startCooldown(tabType)
+    local dot = tabType == "Locations" and locLoadingDot
+    local tween = startLoadingAnimation(dot)
     task.wait(cooldownTime)
     tween:Cancel()
-    locLoadingDot.Visible = false
-    locLoadingDot.Transparency = 0
-    isOnCooldownLocations = false
+    dot.Visible = false
+    dot.Transparency = 0
+
+    if tabType == "Locations" then isOnCooldownLocations = false end
 end
 
 locSpawnBtn.MouseButton1Click:Connect(function()
     if not isOnCooldownLocations and selectedLocation then
         isOnCooldownLocations = true
-        task.spawn(function()
-            if selectedLocation == "Min" then RunMin()
-            elseif selectedLocation == "Max" then RunMax()
-            elseif selectedLocation == "Booking" then RunBooking() end
-        end)
-        task.spawn(startCooldown)
+        task.spawn(function() executeSelected("Locations") end)
+        task.spawn(function() startCooldown("Locations") end)
     end
 end)
-
--- إشعار بالتحميل الناجح
-task.wait(1)
-game.StarterGui:SetCore("SendNotification", {
-    Title = "Gun Spawner UI",
-    Text = "Interface loaded successfully!",
-    Duration = 3
-})
