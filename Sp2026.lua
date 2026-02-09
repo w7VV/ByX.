@@ -416,7 +416,7 @@ screenGui.Parent = PlayerGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 260, 0, 400) -- تصغير أكثر (كان 280×400)
+mainFrame.Size = UDim2.new(0, 260, 0, 400)
 mainFrame.Position = UDim2.new(0, 20, 0.5, -200)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- خلفية سوداء
 mainFrame.BorderSizePixel = 0
@@ -451,7 +451,7 @@ glassEffect.Parent = mainFrame
 
 local mainStroke = Instance.new("UIStroke")
 mainStroke.Thickness = 1.5
-mainStroke.Color = Color3.fromRGB(150, 30, 15) -- لون أحمر داكن لحدود الإطار
+mainStroke.Color = Color3.fromHex("D2007E") -- لون حدود وردي
 mainStroke.Transparency = 0.3
 mainStroke.Parent = mainFrame
 
@@ -461,7 +461,7 @@ local tabButtons = {}
 local tabContents = {}
 
 local tabsFrame = Instance.new("Frame")
-tabsFrame.Size = UDim2.new(0.9, 0, 0, 35) -- تصغير أكثر
+tabsFrame.Size = UDim2.new(0.9, 0, 0, 35)
 tabsFrame.Position = UDim2.new(0.05, 0, 0, 10)
 tabsFrame.BackgroundTransparency = 1
 tabsFrame.Parent = mainFrame
@@ -474,10 +474,10 @@ for i, name in ipairs(tabNames) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, buttonWidth, 1, 0)
     btn.Position = UDim2.new(0, (i-1) * (buttonWidth + tabPadding), 0, 0)
-    btn.BackgroundColor3 = (i == 1) and Color3.fromHex("4A0D00") or Color3.fromHex("961E0F") -- الألوان الجديدة
+    btn.BackgroundColor3 = (i == 1) and Color3.fromHex("770048") or Color3.fromHex("D2007E") -- الألوان الجديدة
     btn.Text = name
     btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 14 -- تصغير حجم النص
+    btn.TextSize = 14
     btn.Font = Enum.Font.GothamBold
     btn.AutoButtonColor = false
     btn.Parent = tabsFrame
@@ -485,8 +485,8 @@ for i, name in ipairs(tabNames) do
     tabButtons[name] = btn
 
     local content = Instance.new("Frame")
-    content.Size = UDim2.new(0.9, 0, 0, 340) -- تصغير الارتفاع
-    content.Position = UDim2.new(0.05, 0, 0, 55) -- تعديل الموضع
+    content.Size = UDim2.new(0.9, 0, 0, 340)
+    content.Position = UDim2.new(0.05, 0, 0, 55)
     content.BackgroundTransparency = 1
     content.Visible = (i == 1)
     content.Parent = mainFrame
@@ -496,10 +496,10 @@ end
 for _, name in ipairs(tabNames) do
     tabButtons[name].MouseButton1Click:Connect(function()
         for k, b in pairs(tabButtons) do
-            b.BackgroundColor3 = Color3.fromHex("961E0F") -- لون غير محدد
+            b.BackgroundColor3 = Color3.fromHex("D2007E") -- لون غير محدد
             tabContents[k].Visible = false
         end
-        tabButtons[name].BackgroundColor3 = Color3.fromHex("4A0D00") -- لون محدد
+        tabButtons[name].BackgroundColor3 = Color3.fromHex("770048") -- لون محدد
         tabContents[name].Visible = true
     end)
 end
@@ -508,12 +508,12 @@ end
 local locContent = tabContents["Locations"]
 
 local minBtn = Instance.new("TextButton")
-minBtn.Size = UDim2.new(0.9, 0, 0, 50) -- تصغير أكثر
+minBtn.Size = UDim2.new(0.9, 0, 0, 50)
 minBtn.Position = UDim2.new(0.05, 0, 0, 10)
-minBtn.BackgroundColor3 = Color3.fromHex("961E0F") -- اللون الجديد
+minBtn.BackgroundColor3 = Color3.fromHex("D2007E") -- اللون الجديد
 minBtn.Text = "Min Lobby"
 minBtn.TextColor3 = Color3.new(1,1,1)
-minBtn.TextSize = 20 -- تصغير حجم النص
+minBtn.TextSize = 20
 minBtn.Font = Enum.Font.GothamBold
 minBtn.Parent = locContent
 Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 10)
@@ -521,7 +521,7 @@ Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 10)
 local maxBtn = Instance.new("TextButton")
 maxBtn.Size = UDim2.new(0.9, 0, 0, 50)
 maxBtn.Position = UDim2.new(0.05, 0, 0, 70)
-maxBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+maxBtn.BackgroundColor3 = Color3.fromHex("D2007E")
 maxBtn.Text = "Max"
 maxBtn.TextColor3 = Color3.new(1,1,1)
 maxBtn.TextSize = 20
@@ -532,7 +532,7 @@ Instance.new("UICorner", maxBtn).CornerRadius = UDim.new(0, 10)
 local bookingBtn = Instance.new("TextButton")
 bookingBtn.Size = UDim2.new(0.9, 0, 0, 50)
 bookingBtn.Position = UDim2.new(0.05, 0, 0, 130)
-bookingBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+bookingBtn.BackgroundColor3 = Color3.fromHex("D2007E")
 bookingBtn.Text = "Booking"
 bookingBtn.TextColor3 = Color3.new(1,1,1)
 bookingBtn.TextSize = 20
@@ -541,41 +541,41 @@ bookingBtn.Parent = locContent
 Instance.new("UICorner", bookingBtn).CornerRadius = UDim.new(0, 10)
 
 minBtn.MouseButton1Click:Connect(function()
-    minBtn.BackgroundColor3 = Color3.fromHex("4A0D00") -- لون محدد
-    maxBtn.BackgroundColor3 = Color3.fromHex("961E0F")
-    bookingBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+    minBtn.BackgroundColor3 = Color3.fromHex("770048") -- لون محدد
+    maxBtn.BackgroundColor3 = Color3.fromHex("D2007E")
+    bookingBtn.BackgroundColor3 = Color3.fromHex("D2007E")
     selectedLocation = "Min"
 end)
 
 maxBtn.MouseButton1Click:Connect(function()
-    maxBtn.BackgroundColor3 = Color3.fromHex("4A0D00")
-    minBtn.BackgroundColor3 = Color3.fromHex("961E0F")
-    bookingBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+    maxBtn.BackgroundColor3 = Color3.fromHex("770048")
+    minBtn.BackgroundColor3 = Color3.fromHex("D2007E")
+    bookingBtn.BackgroundColor3 = Color3.fromHex("D2007E")
     selectedLocation = "Max"
 end)
 
 bookingBtn.MouseButton1Click:Connect(function()
-    bookingBtn.BackgroundColor3 = Color3.fromHex("4A0D00")
-    minBtn.BackgroundColor3 = Color3.fromHex("961E0F")
-    maxBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+    bookingBtn.BackgroundColor3 = Color3.fromHex("770048")
+    minBtn.BackgroundColor3 = Color3.fromHex("D2007E")
+    maxBtn.BackgroundColor3 = Color3.fromHex("D2007E")
     selectedLocation = "Booking"
 end)
 
 local locSpawnBtn = Instance.new("TextButton")
-locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 40) -- تصغير الارتفاع
+locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 40)
 locSpawnBtn.Position = UDim2.new(0.05, 0, 0, 195)
-locSpawnBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+locSpawnBtn.BackgroundColor3 = Color3.fromHex("D2007E")
 locSpawnBtn.Text = "Spawn"
 locSpawnBtn.TextColor3 = Color3.new(1,1,1)
-locSpawnBtn.TextSize = 22 -- تصغير حجم النص
+locSpawnBtn.TextSize = 22
 locSpawnBtn.Font = Enum.Font.GothamBold
 locSpawnBtn.Parent = locContent
 Instance.new("UICorner", locSpawnBtn).CornerRadius = UDim.new(0, 10)
 
 local locLoadingDot = Instance.new("Frame")
-locLoadingDot.Size = UDim2.new(0, 14, 0, 14) -- تصغير الحجم
-locLoadingDot.Position = UDim2.new(1, -25, 0.5, -7) -- تعديل الموضع
-locLoadingDot.BackgroundColor3 = Color3.fromHex("4A0D00") -- لون أغمق للنقطة
+locLoadingDot.Size = UDim2.new(0, 14, 0, 14)
+locLoadingDot.Position = UDim2.new(1, -25, 0.5, -7)
+locLoadingDot.BackgroundColor3 = Color3.fromHex("#22B365") -- لون أخضر كما طلبت
 locLoadingDot.Visible = false
 locLoadingDot.Parent = locSpawnBtn
 Instance.new("UICorner", locLoadingDot).CornerRadius = UDim.new(1, 0)
@@ -605,21 +605,21 @@ local teleportButtons = {
 local tpScroll = Instance.new("ScrollingFrame")
 tpScroll.Size = UDim2.new(1,0,1,0)
 tpScroll.BackgroundTransparency = 1
-tpScroll.ScrollBarThickness = 4 -- تصغير السماكة
+tpScroll.ScrollBarThickness = 4
 tpScroll.Parent = tpContent
 
 local tpList = Instance.new("UIListLayout")
-tpList.Padding = UDim.new(0,5) -- تقليل المسافة
+tpList.Padding = UDim.new(0,5)
 tpList.Parent = tpScroll
 
 -- زر Keycard مع السهم والقائمة المنسدلة
 local keycardBtn = Instance.new("TextButton")
-keycardBtn.Size = UDim2.new(0.95,0,0,35) -- تصغير الارتفاع
+keycardBtn.Size = UDim2.new(0.95,0,0,35)
 keycardBtn.Position = UDim2.new(0.025, 0, 0, 0)
-keycardBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+keycardBtn.BackgroundColor3 = Color3.fromHex("D2007E")
 keycardBtn.Text = "Keycard ▾"
 keycardBtn.TextColor3 = Color3.new(1,1,1)
-keycardBtn.TextSize = 16 -- تصغير حجم النص
+keycardBtn.TextSize = 16
 keycardBtn.Font = Enum.Font.Gotham
 keycardBtn.AutoButtonColor = false
 keycardBtn.Parent = tpScroll
@@ -627,26 +627,26 @@ Instance.new("UICorner", keycardBtn).CornerRadius = UDim.new(0,6)
 
 -- السهم الصغير
 local arrow = Instance.new("TextLabel")
-arrow.Size = UDim2.new(0, 14, 0, 14) -- تصغير الحجم
-arrow.Position = UDim2.new(1, -22, 0.5, -7) -- تعديل الموضع
+arrow.Size = UDim2.new(0, 14, 0, 14)
+arrow.Position = UDim2.new(1, -22, 0.5, -7)
 arrow.BackgroundTransparency = 1
 arrow.Text = "▼"
 arrow.TextColor3 = Color3.new(1,1,1)
-arrow.TextSize = 10 -- تصغير حجم النص
+arrow.TextSize = 10
 arrow.Font = Enum.Font.GothamBold
 arrow.Parent = keycardBtn
 
 -- القائمة المنسدلة (مخفية في البداية)
 local dropdownMenu = Instance.new("Frame")
-dropdownMenu.Size = UDim2.new(0.95, 0, 0, 115) -- تصغير الارتفاع
-dropdownMenu.Position = UDim2.new(0.025, 0, 0, 40) -- تعديل الموضع
-dropdownMenu.BackgroundColor3 = Color3.fromHex("4A0D00") -- خلفية أغمق
+dropdownMenu.Size = UDim2.new(0.95, 0, 0, 115)
+dropdownMenu.Position = UDim2.new(0.025, 0, 0, 40)
+dropdownMenu.BackgroundColor3 = Color3.fromHex("770048") -- خلفية أغمق
 dropdownMenu.Visible = false
 dropdownMenu.Parent = tpScroll
 Instance.new("UICorner", dropdownMenu).CornerRadius = UDim.new(0,6)
 
 local dropdownStroke = Instance.new("UIStroke")
-dropdownStroke.Thickness = 1 -- تصغير السماكة
+dropdownStroke.Thickness = 1
 dropdownStroke.Color = Color3.fromRGB(0, 0, 0)
 dropdownStroke.Transparency = 0.5
 dropdownStroke.Parent = dropdownMenu
@@ -666,12 +666,12 @@ local keycardButtons = {}
 
 for i, cardType in ipairs(keycardTypes) do
     local cardBtn = Instance.new("TextButton")
-    cardBtn.Size = UDim2.new(0.95, 0, 0, 35) -- تصغير الارتفاع
+    cardBtn.Size = UDim2.new(0.95, 0, 0, 35)
     cardBtn.Position = UDim2.new(0.025, 0, 0, (i-1)*36)
-    cardBtn.BackgroundColor3 = Color3.fromHex("961E0F")
+    cardBtn.BackgroundColor3 = Color3.fromHex("D2007E")
     cardBtn.Text = cardType
     cardBtn.TextColor3 = Color3.new(1,1,1)
-    cardBtn.TextSize = 13 -- تصغير حجم النص
+    cardBtn.TextSize = 13
     cardBtn.Font = Enum.Font.Gotham
     cardBtn.AutoButtonColor = false
     cardBtn.Parent = dropdownMenu
@@ -707,11 +707,11 @@ end)
 -- إضافة بقية أزرار التيليبورت
 for _, tp in ipairs(teleportButtons) do
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.95,0,0,35) -- تصغير الارتفاع
-    btn.BackgroundColor3 = Color3.fromHex("961E0F")
+    btn.Size = UDim2.new(0.95,0,0,35)
+    btn.BackgroundColor3 = Color3.fromHex("D2007E")
     btn.Text = tp.name
     btn.TextColor3 = Color3.new(1,1,1)
-    btn.TextSize = 16 -- تصغير حجم النص
+    btn.TextSize = 16
     btn.Font = Enum.Font.Gotham
     btn.AutoButtonColor = false
     btn.Parent = tpScroll
@@ -737,15 +737,15 @@ local playerContent = tabContents["Player"]
 
 -- صورة البروفايل الدائرية
 local profileFrame = Instance.new("Frame")
-profileFrame.Size = UDim2.new(0, 70, 0, 70) -- تصغير الحجم
-profileFrame.Position = UDim2.new(0.5, -35, 0, 10) -- تعديل الموضع
+profileFrame.Size = UDim2.new(0, 70, 0, 70)
+profileFrame.Position = UDim2.new(0.5, -35, 0, 10)
 profileFrame.BackgroundTransparency = 1
 profileFrame.Parent = playerContent
 
 -- محاولة تحميل صورة البروفايل باستخدام رابط Roblox
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
-profileImage.BackgroundColor3 = Color3.fromHex("961E0F") -- خلفية بنفس لون الأزرار
+profileImage.BackgroundColor3 = Color3.fromHex("D2007E") -- خلفية بنفس لون الأزرار
 profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- صورة افتراضية
 profileImage.Parent = profileFrame
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
@@ -772,21 +772,21 @@ task.spawn(function()
 end)
 
 local profileStroke = Instance.new("UIStroke")
-profileStroke.Thickness = 1.5 -- تصغير السماكة
-profileStroke.Color = Color3.fromHex("4A0D00") -- لون أغمق للحدود
+profileStroke.Thickness = 1.5
+profileStroke.Color = Color3.fromHex("770048") -- لون أغمق للحدود
 profileStroke.Parent = profileImage
 
 -- ScrollingFrame للأزرار
 local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Size = UDim2.new(1, 0, 0, 220) -- تصغير الارتفاع
-playerScroll.Position = UDim2.new(0, 0, 0, 90) -- تعديل الموضع
+playerScroll.Size = UDim2.new(1, 0, 0, 220)
+playerScroll.Position = UDim2.new(0, 0, 0, 90)
 playerScroll.BackgroundTransparency = 1
-playerScroll.ScrollBarThickness = 4 -- تصغير السماكة
+playerScroll.ScrollBarThickness = 4
 playerScroll.Parent = playerContent
 
 -- GridLayout داخل الـ ScrollingFrame
 local gridLayout = Instance.new("UIGridLayout")
-gridLayout.CellSize = UDim2.new(0.45, 0, 0, 90) -- تصغير ارتفاع الخلية
+gridLayout.CellSize = UDim2.new(0.45, 0, 0, 90)
 gridLayout.CellPadding = UDim2.new(0.05, 0, 0.05, 0)
 gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
@@ -804,7 +804,8 @@ local playerButtonsData = {
         name = "Plastic",
         imageUrl = "https://i.imgur.com/tzy2Dtx.png",
         filename = "plastic.png",
-        selected = false
+        selected = false,
+        largerSize = true -- إشارة أن هذا الزر أكبر
     },
     {
         name = "Pants",
@@ -825,11 +826,11 @@ local playerButtons = {}
 -- دالة لتحديث مظهر الدائرة
 local function updateSelectionCircle(circle, stroke, selected)
     if selected then
-        circle.BackgroundColor3 = Color3.fromHex("4A0D00") -- لون أغمق عند التحديد
+        circle.BackgroundColor3 = Color3.fromHex("770048") -- لون أغمق عند التحديد
         circle.BackgroundTransparency = 0 -- معبأة
         stroke.Transparency = 1 -- إخفاء الحدود
     else
-        circle.BackgroundColor3 = Color3.fromHex("961E0F") -- لون عادي
+        circle.BackgroundColor3 = Color3.fromHex("D2007E") -- لون عادي
         circle.BackgroundTransparency = 1 -- فارغة
         stroke.Transparency = 0 -- إظهار الحدود
     end
@@ -843,8 +844,20 @@ for i, buttonData in ipairs(playerButtonsData) do
     buttonContainer.Parent = playerScroll
     
     local button = Instance.new("ImageButton")
-    button.Size = UDim2.new(0.8, 0, 0.65, 0) -- تصغير الحجم
-    button.Position = UDim2.new(0.1, 0, 0.05, 0)
+    
+    -- إذا كان هذا زر Plastic، نجعله أكبر
+    if buttonData.largerSize then
+        button.Size = UDim2.new(0.9, 0, 0.75, 0) -- حجم أكبر لزر Plastic
+    else
+        button.Size = UDim2.new(0.8, 0, 0.65, 0) -- الحجم العادي
+    end
+    
+    if buttonData.largerSize then
+        button.Position = UDim2.new(0.05, 0, 0.02, 0) -- موضع أعلى قليلاً للزر الأكبر
+    else
+        button.Position = UDim2.new(0.1, 0, 0.05, 0)
+    end
+    
     button.BackgroundTransparency = 1 -- بدون خلفية
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
@@ -859,34 +872,42 @@ for i, buttonData in ipairs(playerButtonsData) do
     
     -- إطار الدائرة في الزاوية اليمنى العليا
     local circleContainer = Instance.new("Frame")
-    circleContainer.Size = UDim2.new(0, 8, 0, 8) -- تصغير الحجم
-    circleContainer.Position = UDim2.new(0.85, -4, 0.05, -4) -- تحريك لليمين أكثر
+    circleContainer.Size = UDim2.new(0, 8, 0, 8)
+    if buttonData.largerSize then
+        circleContainer.Position = UDim2.new(0.88, -4, 0.02, -4) -- موضع معدل للزر الأكبر
+    else
+        circleContainer.Position = UDim2.new(0.85, -4, 0.05, -4)
+    end
     circleContainer.BackgroundTransparency = 1
     circleContainer.Parent = button
     
     -- الدائرة نفسها
     local selectionCircle = Instance.new("Frame")
     selectionCircle.Size = UDim2.new(1, 0, 1, 0)
-    selectionCircle.BackgroundColor3 = Color3.fromHex("961E0F")
+    selectionCircle.BackgroundColor3 = Color3.fromHex("D2007E")
     selectionCircle.BackgroundTransparency = 1 -- فارغة في البداية
     selectionCircle.Parent = circleContainer
     Instance.new("UICorner", selectionCircle).CornerRadius = UDim.new(1, 0)
     
     -- حدود الدائرة
     local circleStroke = Instance.new("UIStroke")
-    circleStroke.Thickness = 1 -- تصغير السماكة
-    circleStroke.Color = Color3.fromHex("961E0F")
+    circleStroke.Thickness = 1
+    circleStroke.Color = Color3.fromHex("D2007E")
     circleStroke.Transparency = 0 -- ظاهرة في البداية
     circleStroke.Parent = selectionCircle
     
     -- النص تحت الزر
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0.2, 0)
-    label.Position = UDim2.new(0, 0, 0.7, 0)
+    if buttonData.largerSize then
+        label.Position = UDim2.new(0, 0, 0.8, 0) -- موضع النص للزر الأكبر
+    else
+        label.Position = UDim2.new(0, 0, 0.7, 0)
+    end
     label.BackgroundTransparency = 1
     label.Text = buttonData.name
     label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextSize = 10 -- تصغير حجم النص
+    label.TextSize = 10
     label.Font = Enum.Font.GothamBold
     label.Parent = buttonContainer
     
