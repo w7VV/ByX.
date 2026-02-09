@@ -725,7 +725,7 @@ profileFrame.Position = UDim2.new(0.5, -50, 0, 20)
 profileFrame.BackgroundTransparency = 1
 profileFrame.Parent = playerContent
 
--- استخدم رابط Roblox الرسمي لصورة البروفايل
+-- محاولة تحميل صورة البروفايل باستخدام رابط Roblox
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
 profileImage.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
@@ -733,11 +733,25 @@ profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- صور�
 profileImage.Parent = profileFrame
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
 
--- محاولة تحميل صورة البروفايل الحقيقية
+-- تحميل صورة البروفايل الحقيقية
 task.spawn(function()
-    local profileImageUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", player.UserId)
-    local customImage = LoadCustomImage(profileImageUrl, "profile.png")
-    profileImage.Image = customImage
+    local userId = player.UserId
+    local success, result = pcall(function()
+        -- طريقة مباشرة لتحميل صورة البروفايل
+        local thumbnailType = Enum.ThumbnailType.HeadShot
+        local thumbnailSize = Enum.ThumbnailSize.Size420x420
+        local content, isReady = Players:GetUserThumbnailAsync(userId, thumbnailType, thumbnailSize)
+        return content
+    end)
+    
+    if success and result then
+        profileImage.Image = result
+    else
+        -- إذا فشلت الطريقة الأولى، جرب رابط البديل
+        local alternativeUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", userId)
+        local customImage = LoadCustomImage(alternativeUrl, "profile_" .. userId .. ".png")
+        profileImage.Image = customImage
+    end
 end)
 
 local profileStroke = Instance.new("UIStroke")
@@ -791,11 +805,15 @@ local playerButtonsData = {
 local playerButtons = {}
 
 -- دالة لتحديث مظهر الدائرة
-local function updateSelectionCircle(circle, selected)
+local function updateSelectionCircle(circle, stroke, selected)
     if selected then
-        circle.BackgroundColor3 = Color3.fromHex("#22B365")
+        circle.BackgroundColor3 = Color3.fromHex("#22B365") -- أخضر
+        circle.BackgroundTransparency = 0 -- معبأة
+        stroke.Transparency = 1 -- إخفاء الحدود
     else
-        circle.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+        circle.BackgroundColor3 = Color3.fromHex("#22B365") -- نفس اللون
+        circle.BackgroundTransparency = 1 -- فارغة
+        stroke.Transparency = 0 -- إظهار الحدود
     end
 end
 
@@ -807,8 +825,8 @@ for i, buttonData in ipairs(playerButtonsData) do
     buttonContainer.Parent = playerButtonsFrame
     
     local button = Instance.new("ImageButton")
-    button.Size = UDim2.new(0.8, 0, 0.6, 0)
-    button.Position = UDim2.new(0.1, 0, 0.1, 0)
+    button.Size = UDim2.new(0.9, 0, 0.75, 0) -- تكبير حجم الزر
+    button.Position = UDim2.new(0.05, 0, 0.05, 0)
     button.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
@@ -822,23 +840,36 @@ for i, buttonData in ipairs(playerButtonsData) do
         end)
     end
     
-    -- الدائرة في الزاوية اليمنى العليا
+    -- إطار الدائرة في الزاوية اليمنى العليا
+    local circleContainer = Instance.new("Frame")
+    circleContainer.Size = UDim2.new(0, 20, 0, 20) -- تصغير الحجم
+    circleContainer.Position = UDim2.new(0.85, -10, 0.05, -10) -- تحريك لليمين أكثر
+    circleContainer.BackgroundTransparency = 1
+    circleContainer.Parent = button
+    
+    -- الدائرة نفسها
     local selectionCircle = Instance.new("Frame")
-    selectionCircle.Size = UDim2.new(0, 15, 0, 15)
-    selectionCircle.Position = UDim2.new(0.8, -7, 0.1, -7)
-    selectionCircle.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
-    selectionCircle.BorderSizePixel = 0
-    selectionCircle.Parent = button
+    selectionCircle.Size = UDim2.new(1, 0, 1, 0)
+    selectionCircle.BackgroundColor3 = Color3.fromHex("#22B365")
+    selectionCircle.BackgroundTransparency = 1 -- فارغة في البداية
+    selectionCircle.Parent = circleContainer
     Instance.new("UICorner", selectionCircle).CornerRadius = UDim.new(1, 0)
+    
+    -- حدود الدائرة
+    local circleStroke = Instance.new("UIStroke")
+    circleStroke.Thickness = 2
+    circleStroke.Color = Color3.fromHex("#22B365") -- نفس اللون الأخضر
+    circleStroke.Transparency = 0 -- ظاهرة في البداية
+    circleStroke.Parent = selectionCircle
     
     -- النص تحت الزر
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0.25, 0)
-    label.Position = UDim2.new(0, 0, 0.65, 0)
+    label.Size = UDim2.new(1, 0, 0.2, 0)
+    label.Position = UDim2.new(0, 0, 0.8, 0)
     label.BackgroundTransparency = 1
     label.Text = buttonData.name
     label.TextColor3 = Color3.new(1, 1, 1)
-    label.TextSize = 16
+    label.TextSize = 14
     label.Font = Enum.Font.GothamBold
     label.Parent = buttonContainer
     
@@ -847,6 +878,7 @@ for i, buttonData in ipairs(playerButtonsData) do
         container = buttonContainer,
         button = button,
         circle = selectionCircle,
+        stroke = circleStroke,
         data = buttonData
     }
     
@@ -855,7 +887,7 @@ for i, buttonData in ipairs(playerButtonsData) do
         -- إلغاء تحديد جميع الأزرار الأخرى
         for j, btn in ipairs(playerButtons) do
             btn.data.selected = (j == i)
-            updateSelectionCircle(btn.circle, btn.data.selected)
+            updateSelectionCircle(btn.circle, btn.stroke, btn.data.selected)
         end
         
         -- إشعار عند النقر على الزر الأول
@@ -869,7 +901,7 @@ for i, buttonData in ipairs(playerButtonsData) do
     end)
     
     -- تحديث مظهر الدائرة
-    updateSelectionCircle(selectionCircle, buttonData.selected)
+    updateSelectionCircle(selectionCircle, circleStroke, buttonData.selected)
 end
 
 -- ===================================
