@@ -759,20 +759,21 @@ profileStroke.Thickness = 3
 profileStroke.Color = Color3.fromRGB(62, 39, 78)
 profileStroke.Parent = profileImage
 
--- إطار الأزرار
-local playerButtonsFrame = Instance.new("Frame")
-playerButtonsFrame.Size = UDim2.new(1, 0, 0, 250)
-playerButtonsFrame.Position = UDim2.new(0, 0, 0, 140)
-playerButtonsFrame.BackgroundTransparency = 1
-playerButtonsFrame.Parent = playerContent
+-- ScrollingFrame للأزرار
+local playerScroll = Instance.new("ScrollingFrame")
+playerScroll.Size = UDim2.new(1, 0, 0, 280)
+playerScroll.Position = UDim2.new(0, 0, 0, 140)
+playerScroll.BackgroundTransparency = 1
+playerScroll.ScrollBarThickness = 6
+playerScroll.Parent = playerContent
 
--- قائمة الشبكة 2x2
+-- GridLayout داخل الـ ScrollingFrame
 local gridLayout = Instance.new("UIGridLayout")
-gridLayout.CellSize = UDim2.new(0.45, 0, 0, 100)
+gridLayout.CellSize = UDim2.new(0.45, 0, 0, 120) -- زيادة ارتفاع الخلية
 gridLayout.CellPadding = UDim2.new(0.05, 0, 0.05, 0)
 gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-gridLayout.Parent = playerButtonsFrame
+gridLayout.Parent = playerScroll
 
 -- بيانات الأزرار
 local playerButtonsData = {
@@ -783,21 +784,21 @@ local playerButtonsData = {
         selected = false
     },
     {
-        name = "Button 2",
-        imageUrl = "",
-        filename = "button2.png",
+        name = "Plastic",
+        imageUrl = "https://i.imgur.com/tzy2Dtx.png",
+        filename = "plastic.png",
         selected = false
     },
     {
-        name = "Button 3",
-        imageUrl = "",
-        filename = "button3.png",
+        name = "Pants",
+        imageUrl = "https://i.imgur.com/rb5w2bV.png",
+        filename = "pants.png",
         selected = false
     },
     {
-        name = "Button 4",
-        imageUrl = "",
-        filename = "button4.png",
+        name = "Tshirt",
+        imageUrl = "https://i.imgur.com/w8K9RoO.png",
+        filename = "tshirt.png",
         selected = false
     }
 }
@@ -822,15 +823,14 @@ for i, buttonData in ipairs(playerButtonsData) do
     local buttonContainer = Instance.new("Frame")
     buttonContainer.Size = UDim2.new(1, 0, 1, 0)
     buttonContainer.BackgroundTransparency = 1
-    buttonContainer.Parent = playerButtonsFrame
+    buttonContainer.Parent = playerScroll
     
     local button = Instance.new("ImageButton")
     button.Size = UDim2.new(0.9, 0, 0.75, 0) -- تكبير حجم الزر
     button.Position = UDim2.new(0.05, 0, 0.05, 0)
-    button.BackgroundColor3 = Color3.fromRGB(102, 65, 129)
+    button.BackgroundTransparency = 1 -- بدون خلفية
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
-    Instance.new("UICorner", button).CornerRadius = UDim.new(0.2, 0)
     
     -- تحميل الصورة باستخدام الدالة المخصصة
     if buttonData.imageUrl and buttonData.imageUrl ~= "" then
@@ -842,8 +842,8 @@ for i, buttonData in ipairs(playerButtonsData) do
     
     -- إطار الدائرة في الزاوية اليمنى العليا
     local circleContainer = Instance.new("Frame")
-    circleContainer.Size = UDim2.new(0, 20, 0, 20) -- تصغير الحجم
-    circleContainer.Position = UDim2.new(0.85, -10, 0.05, -10) -- تحريك لليمين أكثر
+    circleContainer.Size = UDim2.new(0, 12, 0, 12) -- تصغير الحجم
+    circleContainer.Position = UDim2.new(0.85, -6, 0.05, -6) -- تحريك لليمين أكثر
     circleContainer.BackgroundTransparency = 1
     circleContainer.Parent = button
     
@@ -857,7 +857,7 @@ for i, buttonData in ipairs(playerButtonsData) do
     
     -- حدود الدائرة
     local circleStroke = Instance.new("UIStroke")
-    circleStroke.Thickness = 2
+    circleStroke.Thickness = 1.5 -- أرفع قليلاً
     circleStroke.Color = Color3.fromHex("#22B365") -- نفس اللون الأخضر
     circleStroke.Transparency = 0 -- ظاهرة في البداية
     circleStroke.Parent = selectionCircle
@@ -890,19 +890,20 @@ for i, buttonData in ipairs(playerButtonsData) do
             updateSelectionCircle(btn.circle, btn.stroke, btn.data.selected)
         end
         
-        -- إشعار عند النقر على الزر الأول
-        if i == 1 then
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "Metal",
-                Text = "Metal button selected!",
-                Duration = 2
-            })
-        end
+        -- إشعار عند النقر على الزر
+        game.StarterGui:SetCore("SendNotification", {
+            Title = buttonData.name,
+            Text = buttonData.name .. " button selected!",
+            Duration = 2
+        })
     end)
     
     -- تحديث مظهر الدائرة
     updateSelectionCircle(selectionCircle, circleStroke, buttonData.selected)
 end
+
+-- تعديل حجم الـ ScrollingFrame بناءً على عدد الأزرار
+playerScroll.CanvasSize = UDim2.new(0, 0, 0, gridLayout.AbsoluteContentSize.Y)
 
 -- ===================================
 -- دالة الدروب النهائية
