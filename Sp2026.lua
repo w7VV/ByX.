@@ -1,4 +1,4 @@
-اسمع شفت دا السكربت local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
@@ -13,7 +13,6 @@ local HttpRequest = (syn and syn.request) or (http and http.request) or (fluxus 
 
 local function LoadCustomImage(url, filename)
     if not isfolder then
-        -- إذا لم تكن الدوال المتقدمة متوفرة، نستخدم رابط الصورة مباشرة
         return url
     end
     
@@ -38,7 +37,7 @@ local function LoadCustomImage(url, filename)
         end
     end
     
-    task.wait(0.1)  -- انتظار بسيط
+    task.wait(0.1)
     
     if getcustomasset then
         return getcustomasset(path)
@@ -366,31 +365,20 @@ local function stealKeycard()
         end
         if isNew then
             newItemsFound = true
-            -- لا يتم نقل الكي كارد إلى الشخصية (يبقى في الباكباك)
-            -- فقط نقوم بتسجيل أننا وجدنا عنصر جديد
         end
     end
     
-    -- انتظار إضافي للتأكد من جمع كل شيء
     task.wait(1)
-    
-    -- جولة إضافية للتأكد من جمع كل شيء
     activateAllProximityPrompts()
-    
-    -- انتظار نهائي
     task.wait(1)
     
-    -- إعادة اللاعب إلى المكان الأصلي
     hrp.CFrame = savedPosition
-    
-    -- إرجاع إعدادات الكاميرا
     camera.CameraType = savedCameraType
     camera.CameraSubject = savedCameraSubject
     camera.FieldOfView = savedFOV
     
     isStealingKeycard = false
     
-    -- إشعار بنجاح العملية
     if newItemsFound then
         game.StarterGui:SetCore("SendNotification", {
             Title = "Keycard Collected",
@@ -418,14 +406,25 @@ local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 260, 0, 400)
 mainFrame.Position = UDim2.new(0, 20, 0.5, -200)
-mainFrame.BackgroundColor3 = Color3.fromRGB(255, 20, 147) -- خلفية فوشي
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 14)
 
--- تأثير التألق البسيط (Liquid Glass)
+-- إضافة تدرج فوشيا بدلاً من الأسود
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 105, 180)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 20, 147)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(199, 21, 133))
+})
+gradient.Transparency = NumberSequence.new(0.2)
+gradient.Rotation = 45
+gradient.Parent = mainFrame
+
+-- تأثير التألق البسيط
 local glassEffect = Instance.new("Frame")
 glassEffect.Size = UDim2.new(1, 0, 0.15, 0)
 glassEffect.Position = UDim2.new(0, 0, 0, 0)
@@ -436,7 +435,7 @@ glassEffect.Parent = mainFrame
 
 local mainStroke = Instance.new("UIStroke")
 mainStroke.Thickness = 1.5
-mainStroke.Color = Color3.fromRGB(255, 105, 180) -- لون فوشي للحدود
+mainStroke.Color = Color3.fromRGB(255, 105, 180)
 mainStroke.Transparency = 0.2
 mainStroke.Parent = mainFrame
 
@@ -455,11 +454,32 @@ local tabPadding = 3
 local totalWidth = 260 * 0.9
 local buttonWidth = (totalWidth - (#tabNames - 1) * tabPadding) / #tabNames
 
+-- دالة لإنشاء تدرج الأزرار
+local function createButtonGradient(button, isSelected)
+    local gradient = Instance.new("UIGradient")
+    if isSelected then
+        gradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 182, 193)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 105, 180)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 20, 140))
+        })
+    else
+        gradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 20, 147)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(199, 21, 133)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 20, 120))
+        })
+    end
+    gradient.Rotation = 90
+    gradient.Parent = button
+    return gradient
+end
+
 for i, name in ipairs(tabNames) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, buttonWidth, 1, 0)
     btn.Position = UDim2.new(0, (i-1) * (buttonWidth + tabPadding), 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- فوشي متوسط
+    btn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
     btn.Text = name
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 14
@@ -467,6 +487,8 @@ for i, name in ipairs(tabNames) do
     btn.AutoButtonColor = false
     btn.Parent = tabsFrame
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    createButtonGradient(btn, i == 1)
     
     tabButtons[name] = btn
 
@@ -482,10 +504,22 @@ end
 for _, name in ipairs(tabNames) do
     tabButtons[name].MouseButton1Click:Connect(function()
         for k, b in pairs(tabButtons) do
-            b.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- لون عادي
+            b.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+            for _, child in pairs(b:GetChildren()) do
+                if child:IsA("UIGradient") then
+                    child:Destroy()
+                end
+            end
+            createButtonGradient(b, false)
             tabContents[k].Visible = false
         end
-        tabButtons[name].BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- فوشي فاتح عند التحديد
+        tabButtons[name].BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+        for _, child in pairs(tabButtons[name]:GetChildren()) do
+            if child:IsA("UIGradient") then
+                child:Destroy()
+            end
+        end
+        createButtonGradient(tabButtons[name], true)
         tabContents[name].Visible = true
     end)
 end
@@ -497,7 +531,7 @@ local function createLocationButton(name, position, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.9, 0, 0, 50)
     btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- فوشي متوسط
+    btn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
     btn.Text = name
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 20
@@ -505,6 +539,8 @@ local function createLocationButton(name, position, yPos)
     btn.AutoButtonColor = false
     btn.Parent = locContent
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    
+    createButtonGradient(btn, false)
     
     return btn
 end
@@ -518,13 +554,23 @@ local selectedLocationButton = nil
 
 local function selectLocationButton(btn)
     if selectedLocationButton then
-        -- إعادة تعيين الزر السابق
-        selectedLocationButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+        selectedLocationButton.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+        for _, child in pairs(selectedLocationButton:GetChildren()) do
+            if child:IsA("UIGradient") then
+                child:Destroy()
+            end
+        end
+        createButtonGradient(selectedLocationButton, false)
     end
     
-    -- تحديد الزر الجديد
     selectedLocationButton = btn
-    btn.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- فوشي فاتح
+    btn.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+    for _, child in pairs(btn:GetChildren()) do
+        if child:IsA("UIGradient") then
+            child:Destroy()
+        end
+    end
+    createButtonGradient(btn, true)
 end
 
 minBtn.MouseButton1Click:Connect(function()
@@ -545,7 +591,7 @@ end)
 local locSpawnBtn = Instance.new("TextButton")
 locSpawnBtn.Size = UDim2.new(0.9, 0, 0, 40)
 locSpawnBtn.Position = UDim2.new(0.05, 0, 0, 195)
-locSpawnBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- فوشي متوسط
+locSpawnBtn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
 locSpawnBtn.Text = "Spawn"
 locSpawnBtn.TextColor3 = Color3.new(1,1,1)
 locSpawnBtn.TextSize = 22
@@ -553,10 +599,12 @@ locSpawnBtn.Font = Enum.Font.GothamBold
 locSpawnBtn.Parent = locContent
 Instance.new("UICorner", locSpawnBtn).CornerRadius = UDim.new(0, 10)
 
+createButtonGradient(locSpawnBtn, false)
+
 local locLoadingDot = Instance.new("Frame")
 locLoadingDot.Size = UDim2.new(0, 14, 0, 14)
 locLoadingDot.Position = UDim2.new(1, -25, 0.5, -7)
-locLoadingDot.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- فوشي فاتح للنقطة
+locLoadingDot.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
 locLoadingDot.Visible = false
 locLoadingDot.Parent = locSpawnBtn
 Instance.new("UICorner", locLoadingDot).CornerRadius = UDim.new(1, 0)
@@ -597,7 +645,7 @@ tpList.Parent = tpScroll
 local keycardBtn = Instance.new("TextButton")
 keycardBtn.Size = UDim2.new(0.95,0,0,35)
 keycardBtn.Position = UDim2.new(0.025, 0, 0, 0)
-keycardBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- فوشي متوسط
+keycardBtn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
 keycardBtn.Text = "Keycard ▾"
 keycardBtn.TextColor3 = Color3.new(1,1,1)
 keycardBtn.TextSize = 16
@@ -605,6 +653,8 @@ keycardBtn.Font = Enum.Font.Gotham
 keycardBtn.AutoButtonColor = false
 keycardBtn.Parent = tpScroll
 Instance.new("UICorner", keycardBtn).CornerRadius = UDim.new(0,6)
+
+createButtonGradient(keycardBtn, false)
 
 -- السهم الصغير
 local arrow = Instance.new("TextLabel")
@@ -617,18 +667,28 @@ arrow.TextSize = 10
 arrow.Font = Enum.Font.GothamBold
 arrow.Parent = keycardBtn
 
--- القائمة المنسدلة (مخفية في البداية)
+-- القائمة المنسدلة
 local dropdownMenu = Instance.new("Frame")
 dropdownMenu.Size = UDim2.new(0.95, 0, 0, 115)
 dropdownMenu.Position = UDim2.new(0.025, 0, 0, 40)
-dropdownMenu.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- فوشي فاتح
+dropdownMenu.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
 dropdownMenu.Visible = false
 dropdownMenu.Parent = tpScroll
 Instance.new("UICorner", dropdownMenu).CornerRadius = UDim.new(0,6)
 
+-- تدرج للقائمة المنسدلة
+local dropdownGradient = Instance.new("UIGradient")
+dropdownGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 182, 193)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 105, 180)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 20, 140))
+})
+dropdownGradient.Rotation = 90
+dropdownGradient.Parent = dropdownMenu
+
 local dropdownStroke = Instance.new("UIStroke")
 dropdownStroke.Thickness = 1
-dropdownStroke.Color = Color3.fromRGB(255, 105, 180)
+dropdownStroke.Color = Color3.fromRGB(255, 20, 147)
 dropdownStroke.Transparency = 0.5
 dropdownStroke.Parent = dropdownMenu
 
@@ -650,7 +710,7 @@ for i, cardType in ipairs(keycardTypes) do
     local cardBtn = Instance.new("TextButton")
     cardBtn.Size = UDim2.new(0.95, 0, 0, 35)
     cardBtn.Position = UDim2.new(0.025, 0, 0, (i-1)*36)
-    cardBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    cardBtn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
     cardBtn.Text = cardType
     cardBtn.TextColor3 = Color3.new(1,1,1)
     cardBtn.TextSize = 13
@@ -659,10 +719,17 @@ for i, cardType in ipairs(keycardTypes) do
     cardBtn.Parent = dropdownMenu
     Instance.new("UICorner", cardBtn).CornerRadius = UDim.new(0,5)
     
+    createButtonGradient(cardBtn, false)
+    
     cardBtn.MouseButton1Click:Connect(function()
-        -- تحديد الزر
         if selectedKeycardButton then
-            selectedKeycardButton.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+            selectedKeycardButton.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+            for _, child in pairs(selectedKeycardButton:GetChildren()) do
+                if child:IsA("UIGradient") then
+                    child:Destroy()
+                end
+            end
+            createButtonGradient(selectedKeycardButton, false)
         end
         
         selectedKeycardButton = cardBtn
@@ -670,10 +737,14 @@ for i, cardType in ipairs(keycardTypes) do
         keycardBtn.Text = "Keycard: " .. cardType .. " ▾"
         dropdownMenu.Visible = false
         
-        -- تحديث الزر المحدد
         cardBtn.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+        for _, child in pairs(cardBtn:GetChildren()) do
+            if child:IsA("UIGradient") then
+                child:Destroy()
+            end
+        end
+        createButtonGradient(cardBtn, true)
         
-        -- بدء عملية السرقة
         pcall(stealKeycard)
     end)
     
@@ -699,7 +770,7 @@ end)
 for _, tp in ipairs(teleportButtons) do
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0.95,0,0,35)
-    btn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
     btn.Text = tp.name
     btn.TextColor3 = Color3.new(1,1,1)
     btn.TextSize = 16
@@ -707,6 +778,8 @@ for _, tp in ipairs(teleportButtons) do
     btn.AutoButtonColor = false
     btn.Parent = tpScroll
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    
+    createButtonGradient(btn, false)
 
     if tp.action == "gun" then
         btn.MouseButton1Click:Connect(function()
@@ -726,26 +799,52 @@ tpScroll.CanvasSize = UDim2.new(0,0,0,(#teleportButtons + 1) * 40 + 115)
 -- ==================== Player Tab ====================
 local playerContent = tabContents["Player"]
 
+-- ScrollingFrame جديد لقسم البلاير
+local playerScrollMain = Instance.new("ScrollingFrame")
+playerScrollMain.Size = UDim2.new(1, 0, 1, 0)
+playerScrollMain.BackgroundTransparency = 1
+playerScrollMain.ScrollBarThickness = 4
+playerScrollMain.Parent = playerContent
+
+local playerListLayout = Instance.new("UIListLayout")
+playerListLayout.Padding = UDim.new(0, 10)
+playerListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+playerListLayout.Parent = playerScrollMain
+
 -- صورة البروفايل الدائرية
 local profileFrame = Instance.new("Frame")
-profileFrame.Size = UDim2.new(0, 70, 0, 70)
-profileFrame.Position = UDim2.new(0.5, -35, 0, 10)
+profileFrame.Size = UDim2.new(0.9, 0, 0, 100)
+profileFrame.Position = UDim2.new(0.05, 0, 0, 10)
 profileFrame.BackgroundTransparency = 1
-profileFrame.Parent = playerContent
+profileFrame.Parent = playerScrollMain
 
--- محاولة تحميل صورة البروفايل باستخدام رابط Roblox
+local profileImageContainer = Instance.new("Frame")
+profileImageContainer.Size = UDim2.new(0, 70, 0, 70)
+profileImageContainer.Position = UDim2.new(0.5, -35, 0, 0)
+profileImageContainer.BackgroundTransparency = 1
+profileImageContainer.Parent = profileFrame
+
 local profileImage = Instance.new("ImageLabel")
 profileImage.Size = UDim2.new(1, 0, 1, 0)
-profileImage.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- خلفية فوشي
-profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png" -- صورة افتراضية
-profileImage.Parent = profileFrame
+profileImage.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+profileImage.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+profileImage.Parent = profileImageContainer
 Instance.new("UICorner", profileImage).CornerRadius = UDim.new(1, 0)
+
+-- تدرج للصورة
+local profileGradient = Instance.new("UIGradient")
+profileGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 20, 147)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(199, 21, 133)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 20, 120))
+})
+profileGradient.Rotation = 90
+profileGradient.Parent = profileImage
 
 -- تحميل صورة البروفايل الحقيقية
 task.spawn(function()
     local userId = player.UserId
     local success, result = pcall(function()
-        -- طريقة مباشرة لتحميل صورة البروفايل
         local thumbnailType = Enum.ThumbnailType.HeadShot
         local thumbnailSize = Enum.ThumbnailSize.Size420x420
         local content, isReady = Players:GetUserThumbnailAsync(userId, thumbnailType, thumbnailSize)
@@ -755,7 +854,6 @@ task.spawn(function()
     if success and result then
         profileImage.Image = result
     else
-        -- إذا فشلت الطريقة الأولى، جرب رابط البديل
         local alternativeUrl = string.format("https://www.roblox.com/headshot-thumbnail/image?userId=%d&width=150&height=150&format=png", userId)
         local customImage = LoadCustomImage(alternativeUrl, "profile_" .. userId .. ".png")
         profileImage.Image = customImage
@@ -764,27 +862,37 @@ end)
 
 local profileStroke = Instance.new("UIStroke")
 profileStroke.Thickness = 1.5
-profileStroke.Color = Color3.fromRGB(255, 182, 193) -- فوشي فاتح للحدود
+profileStroke.Color = Color3.fromRGB(255, 182, 193)
 profileStroke.Parent = profileImage
 
--- ScrollingFrame للأزرار
-local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Size = UDim2.new(1, 0, 0, 220)
-playerScroll.Position = UDim2.new(0, 0, 0, 90)
-playerScroll.BackgroundTransparency = 1
-playerScroll.ScrollBarThickness = 4
-playerScroll.Parent = playerContent
+-- إضافة قسم جديد للـ ScrollingFrame
+local materialsFrame = Instance.new("Frame")
+materialsFrame.Size = UDim2.new(0.9, 0, 0, 200)
+materialsFrame.Position = UDim2.new(0.05, 0, 0, 110)
+materialsFrame.BackgroundTransparency = 1
+materialsFrame.Parent = playerScrollMain
 
--- GridLayout داخل الـ ScrollingFrame
+local materialsTitle = Instance.new("TextLabel")
+materialsTitle.Size = UDim2.new(1, 0, 0, 30)
+materialsTitle.Position = UDim2.new(0, 0, 0, 0)
+materialsTitle.BackgroundTransparency = 1
+materialsTitle.Text = "Materials"
+materialsTitle.TextColor3 = Color3.new(1, 1, 1)
+materialsTitle.TextSize = 16
+materialsTitle.Font = Enum.Font.GothamBold
+materialsTitle.TextXAlignment = Enum.TextXAlignment.Left
+materialsTitle.Parent = materialsFrame
+
+-- GridLayout للمواد
 local gridLayout = Instance.new("UIGridLayout")
-gridLayout.CellSize = UDim2.new(0.45, 0, 0, 90)
+gridLayout.CellSize = UDim2.new(0.45, 0, 0, 80)
 gridLayout.CellPadding = UDim2.new(0.05, 0, 0.05, 0)
 gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 gridLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-gridLayout.Parent = playerScroll
+gridLayout.Parent = materialsFrame
 
--- بيانات الأزرار
-local playerButtonsData = {
+-- بيانات المواد
+local materialsData = {
     {
         name = "Metal",
         imageUrl = "https://i.imgur.com/hZXn5h7.png",
@@ -808,116 +916,149 @@ local playerButtonsData = {
         imageUrl = "https://i.imgur.com/w8K9RoO.png",
         filename = "tshirt.png",
         selected = false
+    },
+    -- إضافة مواد إضافية مستقبلاً
+    {
+        name = "Wood",
+        imageUrl = "",
+        filename = "wood.png",
+        selected = false
+    },
+    {
+        name = "Glass",
+        imageUrl = "",
+        filename = "glass.png",
+        selected = false
     }
 }
 
-local playerButtons = {}
+local materialButtons = {}
 
--- دالة لتحديث مظهر الدائرة
+-- دالة لتحديد الدائرة
 local function updateSelectionCircle(circle, stroke, selected)
     if selected then
-        circle.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- فوشي فاتح عند التحديد
-        circle.BackgroundTransparency = 0 -- معبأة
-        stroke.Transparency = 1 -- إخفاء الحدود
+        circle.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
+        circle.BackgroundTransparency = 0
+        stroke.Transparency = 1
     else
-        circle.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- فوشي عادي
-        circle.BackgroundTransparency = 1 -- فارغة
-        stroke.Transparency = 0 -- إظهار الحدود
+        circle.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+        circle.BackgroundTransparency = 1
+        stroke.Transparency = 0
     end
 end
 
--- إنشاء الأزرار
-for i, buttonData in ipairs(playerButtonsData) do
+-- إنشاء أزرار المواد
+for i, material in ipairs(materialsData) do
     local buttonContainer = Instance.new("Frame")
     buttonContainer.Size = UDim2.new(1, 0, 1, 0)
     buttonContainer.BackgroundTransparency = 1
-    buttonContainer.Parent = playerScroll
+    buttonContainer.Parent = materialsFrame
     
     local button = Instance.new("ImageButton")
     button.Size = UDim2.new(0.8, 0, 0.65, 0)
     button.Position = UDim2.new(0.1, 0, 0.05, 0)
-    button.BackgroundTransparency = 1 -- بدون خلفية
+    button.BackgroundTransparency = 1
     button.ScaleType = Enum.ScaleType.Fit
     button.Parent = buttonContainer
     
-    -- تحميل الصورة باستخدام الدالة المخصصة
-    if buttonData.imageUrl and buttonData.imageUrl ~= "" then
+    if material.imageUrl and material.imageUrl ~= "" then
         task.spawn(function()
-            local customImage = LoadCustomImage(buttonData.imageUrl, buttonData.filename)
+            local customImage = LoadCustomImage(material.imageUrl, material.filename)
             button.Image = customImage
         end)
+    else
+        button.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+        Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+        local text = Instance.new("TextLabel")
+        text.Size = UDim2.new(1, 0, 1, 0)
+        text.BackgroundTransparency = 1
+        text.Text = material.name
+        text.TextColor3 = Color3.new(1, 1, 1)
+        text.TextSize = 12
+        text.Font = Enum.Font.GothamBold
+        text.Parent = button
     end
     
-    -- إطار الدائرة في الزاوية اليمنى العليا
+    -- الدائرة
     local circleContainer = Instance.new("Frame")
     circleContainer.Size = UDim2.new(0, 8, 0, 8)
     circleContainer.Position = UDim2.new(0.85, -4, 0.05, -4)
     circleContainer.BackgroundTransparency = 1
     circleContainer.Parent = button
     
-    -- الدائرة نفسها
     local selectionCircle = Instance.new("Frame")
     selectionCircle.Size = UDim2.new(1, 0, 1, 0)
-    selectionCircle.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    selectionCircle.BackgroundTransparency = 1 -- فارغة في البداية
+    selectionCircle.BackgroundColor3 = Color3.fromRGB(255, 20, 147)
+    selectionCircle.BackgroundTransparency = 1
     selectionCircle.Parent = circleContainer
     Instance.new("UICorner", selectionCircle).CornerRadius = UDim.new(1, 0)
     
-    -- حدود الدائرة
     local circleStroke = Instance.new("UIStroke")
     circleStroke.Thickness = 1
-    circleStroke.Color = Color3.fromRGB(255, 105, 180)
-    circleStroke.Transparency = 0 -- ظاهرة في البداية
+    circleStroke.Color = Color3.fromRGB(255, 20, 147)
+    circleStroke.Transparency = 0
     circleStroke.Parent = selectionCircle
     
-    -- النص تحت الزر
+    -- النص
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, 0, 0.2, 0)
     label.Position = UDim2.new(0, 0, 0.7, 0)
     label.BackgroundTransparency = 1
-    label.Text = buttonData.name
+    label.Text = material.name
     label.TextColor3 = Color3.new(1, 1, 1)
     label.TextSize = 10
     label.Font = Enum.Font.GothamBold
     label.Parent = buttonContainer
     
-    -- تخزين البيانات
-    playerButtons[i] = {
+    materialButtons[i] = {
         container = buttonContainer,
         button = button,
         circle = selectionCircle,
         stroke = circleStroke,
-        data = buttonData
+        data = material
     }
     
-    -- حدث النقر
     button.MouseButton1Click:Connect(function()
-        -- إلغاء تحديد جميع الأزرار الأخرى
-        for j, btn in ipairs(playerButtons) do
+        for j, btn in ipairs(materialButtons) do
             btn.data.selected = (j == i)
             updateSelectionCircle(btn.circle, btn.stroke, btn.data.selected)
         end
         
-        -- إشعار عند النقر على الزر
         game.StarterGui:SetCore("SendNotification", {
-            Title = buttonData.name,
-            Text = buttonData.name .. " button selected!",
+            Title = material.name,
+            Text = material.name .. " material selected!",
             Duration = 1.5
         })
     end)
     
-    -- تحديث مظهر الدائرة
-    updateSelectionCircle(selectionCircle, circleStroke, buttonData.selected)
+    updateSelectionCircle(selectionCircle, circleStroke, material.selected)
 end
 
--- تعديل حجم الـ ScrollingFrame بناءً على عدد الأزرار
-playerScroll.CanvasSize = UDim2.new(0, 0, 0, gridLayout.AbsoluteContentSize.Y)
+-- قسم جديد فارغ لإضافة أزرار مستقبلية
+local extraSection = Instance.new("Frame")
+extraSection.Size = UDim2.new(0.9, 0, 0, 150)
+extraSection.Position = UDim2.new(0.05, 0, 0, 320)
+extraSection.BackgroundTransparency = 1
+extraSection.Parent = playerScrollMain
+
+local extraTitle = Instance.new("TextLabel")
+extraTitle.Size = UDim2.new(1, 0, 0, 30)
+extraTitle.Position = UDim2.new(0, 0, 0, 0)
+extraTitle.BackgroundTransparency = 1
+extraTitle.Text = "More Features (Coming Soon)"
+extraTitle.TextColor3 = Color3.new(1, 1, 1)
+extraTitle.TextSize = 14
+extraTitle.Font = Enum.Font.GothamBold
+extraTitle.TextXAlignment = Enum.TextXAlignment.Left
+extraTitle.Parent = extraSection
+
+-- ضبط حجم الـ Canvas
+playerScrollMain.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 50)
 
 -- ===================================
 -- دالة الدروب النهائية
 -- ===================================
 local function RunDrop(dropCFrame, camDropPos, armoryPos)
-    -- ★★★ تشغيل سكربت فتح الجدران مرة واحدة فقط ★★★
     activateWallScript()
     
     task.wait(0.10)
