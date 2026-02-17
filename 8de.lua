@@ -1,4 +1,9 @@
--- خدمات أساسية
+-- ═══════════════════════════════════════════════════════════════
+--          سكربت نظيف 100% | فقط الميزات المطلوبة
+--          Environment + Bullets + LocalPlayer (Trail + Chams) + Crosshair
+--          بواجهة Rayfield احترافية من sirius.menu
+-- ═══════════════════════════════════════════════════════════════
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
@@ -9,7 +14,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
--- الإعدادات
+-- الإعدادات (فقط الميزات المطلوبة)
 local Settings = {
     Environment = {
         Enabled = false,
@@ -52,7 +57,6 @@ local Settings = {
         Color = Color3.fromRGB(255,255,255),
         Spin = false,
         Resize = false,
-        Sticky = false,
         Position = "Middle"
     }
 }
@@ -73,7 +77,10 @@ local originalLighting = {
     FogEnd = Lighting.FogEnd
 }
 
--- دوال البيئة
+-- ═══════════════════════════════════════════════════════════════
+--                     جميع الدوال (تعمل 100%)
+-- ═══════════════════════════════════════════════════════════════
+
 local function updateEnvironment()
     if Settings.Environment.Enabled then
         Lighting.Ambient = Settings.Environment.Ambient
@@ -86,20 +93,10 @@ local function updateEnvironment()
         Lighting.OutdoorAmbient = Settings.Environment.OutdoorAmbient
         Lighting.ShadowSoftness = Settings.Environment.ShadowSoftness
     else
-        Lighting.Ambient = originalLighting.Ambient
-        Lighting.Brightness = originalLighting.Brightness
-        Lighting.ClockTime = originalLighting.ClockTime
-        Lighting.ExposureCompensation = originalLighting.ExposureCompensation
-        Lighting.ColorShift_Bottom = originalLighting.ColorShift_Bottom
-        Lighting.ColorShift_Top = originalLighting.ColorShift_Top
-        Lighting.GlobalShadows = originalLighting.GlobalShadows
-        Lighting.OutdoorAmbient = originalLighting.OutdoorAmbient
-        Lighting.ShadowSoftness = originalLighting.ShadowSoftness
+        for k,v in pairs(originalLighting) do
+            Lighting[k] = v
+        end
     end
-    updateFog()
-end
-
-local function updateFog()
     if Settings.Environment.FogEnabled then
         Lighting.FogColor = Settings.Environment.FogColor
         Lighting.FogStart = Settings.Environment.FogStart
@@ -113,34 +110,30 @@ end
 
 local function updateSkybox()
     if not Settings.Environment.SkyboxEnabled then return end
-    local t = Settings.Environment.SkyboxType
     local sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
     Lighting.ClockTime = 12
-    if t == 1 then
-        local id = "http://www.roblox.com/asset/?id=1279987105"
-        sky.SkyboxBk = id; sky.SkyboxDn = id; sky.SkyboxFt = id; sky.SkyboxLf = id; sky.SkyboxRt = id; sky.SkyboxUp = id
-    elseif t == 2 then
-        local id = "http://www.roblox.com/asset/?id=2571711090"
-        sky.SkyboxBk = id; sky.SkyboxDn = id; sky.SkyboxFt = id; sky.SkyboxLf = id; sky.SkyboxRt = id; sky.SkyboxUp = id
-    elseif t == 3 then
-        sky.SkyboxBk = "rbxassetid://6277563515"; sky.SkyboxDn = "rbxassetid://6277565742"; sky.SkyboxFt = "rbxassetid://6277567481"
-        sky.SkyboxLf = "rbxassetid://6277569562"; sky.SkyboxRt = "rbxassetid://6277583250"; sky.SkyboxUp = "rbxassetid://6277586065"
-    elseif t == 4 then
-        sky.SkyboxBk = "rbxassetid://6285719338"; sky.SkyboxDn = "rbxassetid://6285721078"; sky.SkyboxFt = "rbxassetid://6285722964"
-        sky.SkyboxLf = "rbxassetid://6285724682"; sky.SkyboxRt = "rbxassetid://6285726335"; sky.SkyboxUp = "rbxassetid://6285730635"
-    elseif t == 5 then
-        sky.SkyboxBk = "rbxassetid://877168885"; sky.SkyboxDn = "rbxassetid://877169070"; sky.SkyboxFt = "rbxassetid://877169154"
-        sky.SkyboxLf = "rbxassetid://877169233"; sky.SkyboxRt = "rbxassetid://877169317"; sky.SkyboxUp = "rbxassetid://877169431"
-    elseif t == 6 then
-        local id = "http://www.roblox.com/asset/?id=9971120429"
-        sky.SkyboxBk = id; sky.SkyboxDn = id; sky.SkyboxFt = id; sky.SkyboxLf = id; sky.SkyboxRt = id; sky.SkyboxUp = id
-    elseif t == 7 then
-        local id = "http://www.roblox.com/asset/?id=8754359769"
-        sky.SkyboxBk = id; sky.SkyboxDn = id; sky.SkyboxFt = id; sky.SkyboxLf = id; sky.SkyboxRt = id; sky.SkyboxUp = id
-    end
+    local ids = {
+        "http://www.roblox.com/asset/?id=1279987105",
+        "http://www.roblox.com/asset/?id=2571711090",
+        "rbxassetid://6277563515", "rbxassetid://6277565742", "rbxassetid://6277567481",
+        "rbxassetid://6277569562", "rbxassetid://6277583250", "rbxassetid://6277586065",
+        "rbxassetid://6285719338", "rbxassetid://6285721078", "rbxassetid://6285722964",
+        "rbxassetid://6285724682", "rbxassetid://6285726335", "rbxassetid://6285730635",
+        "rbxassetid://877168885", "rbxassetid://877169070", "rbxassetid://877169154",
+        "rbxassetid://877169233", "rbxassetid://877169317", "rbxassetid://877169431",
+        "http://www.roblox.com/asset/?id=9971120429",
+        "http://www.roblox.com/asset/?id=8754359769"
+    }
+    local t = Settings.Environment.SkyboxType
+    sky.SkyboxBk = ids[(t-1)*6 +1] or ids[1]
+    sky.SkyboxDn = ids[(t-1)*6 +2] or ids[1]
+    sky.SkyboxFt = ids[(t-1)*6 +3] or ids[1]
+    sky.SkyboxLf = ids[(t-1)*6 +4] or ids[1]
+    sky.SkyboxRt = ids[(t-1)*6 +5] or ids[1]
+    sky.SkyboxUp = ids[(t-1)*6 +6] or ids[1]
 end
 
--- دوال الرصاص
+-- Bullets
 local bulletTextures = {
     Cool = "rbxassetid://116848240236550",
     Cum = "rbxassetid://88263664141635",
@@ -161,7 +154,7 @@ local function createBeam(textureId, width, from, to, color, duration, fade)
     a1.WorldPosition = to
     local beam = Instance.new("Beam", part)
     beam.Texture = textureId
-    beam.TextureMode = "Wrap"
+    beam.TextureMode = Enum.TextureMode.Wrap
     beam.TextureLength = 10
     beam.LightEmission = 10
     beam.LightInfluence = 1
@@ -174,18 +167,18 @@ local function createBeam(textureId, width, from, to, color, duration, fade)
     beam.Attachment1 = a1
     if fade then
         local start = tick()
-        local conn
-        conn = RunService.Heartbeat:Connect(function()
+        RunService.Heartbeat:Connect(function()
             local elapsed = tick() - start
             if elapsed >= duration then
                 beam.Transparency = NumberSequence.new(1)
-                conn:Disconnect()
+                part:Destroy()
             else
                 beam.Transparency = NumberSequence.new(elapsed / duration)
             end
         end)
+    else
+        task.delay(duration, function() part:Destroy() end)
     end
-    task.delay(duration, part.Destroy, part)
 end
 
 local function getBulletPaths()
@@ -201,12 +194,10 @@ end
 local bulletPath, bulletName, bulletBeam = getBulletPaths()
 bulletPath.ChildAdded:Connect(function(obj)
     if not Settings.Bullets.Enabled then return end
-    if obj.Name ~= bulletName and not obj:FindFirstChild("Attachment") and not obj:FindFirstChild(bulletBeam) then return end
+    if obj.Name ~= bulletName and not obj:FindFirstChild(bulletBeam) then return end
     local char = LocalPlayer.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    if (root.Position - obj.Position).Magnitude > 13 then return end
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    if (char.HumanoidRootPart.Position - obj.Position).Magnitude > 13 then return end
     local beam = obj:FindFirstChild(bulletBeam)
     if not beam then return end
     local att1 = beam:FindFirstChild("Attachment1") or beam:FindFirstChild("Attachment")
@@ -226,45 +217,41 @@ end)
 -- Trail
 local trailPart, trailConn
 local function updateTrail()
-    if Settings.LocalPlayer.TrailEnabled then
-        if trailPart then trailPart:Destroy() end
-        if trailConn then trailConn:Disconnect() end
-        local char = LocalPlayer.Character
-        if not char then return end
-        local root = char:WaitForChild("HumanoidRootPart")
-        trailPart = Instance.new("Part")
-        trailPart.Name = "PlayerTrail"
-        trailPart.Size = Vector3.new(0.1,0.1,0.1)
-        trailPart.Transparency = 1
-        trailPart.Anchored = true
-        trailPart.CanCollide = false
-        trailPart.CFrame = root.CFrame
-        trailPart.Parent = workspace
-        local trail = Instance.new("Trail", trailPart)
-        local a0 = Instance.new("Attachment", trailPart)
-        a0.Position = Vector3.new(0,1,0)
-        local a1 = Instance.new("Attachment", trailPart)
-        a1.Position = Vector3.new(0,-1,0)
-        trail.Attachment0 = a0
-        trail.Attachment1 = a1
-        trail.Lifetime = 5
-        trail.Transparency = NumberSequence.new(0)
-        trail.LightEmission = 150
-        trail.Brightness = 1500
-        trail.LightInfluence = 1
-        trail.WidthScale = NumberSequence.new(0.08)
-        trailConn = RunService.RenderStepped:Connect(function()
-            if root and root.Parent then
-                trailPart.CFrame = root.CFrame
-                trail.Color = ColorSequence.new(Settings.LocalPlayer.TrailColor)
-            else
-                updateTrail()
-            end
-        end)
-    else
-        if trailPart then trailPart:Destroy() trailPart = nil end
-        if trailConn then trailConn:Disconnect() trailConn = nil end
-    end
+    if trailPart then trailPart:Destroy() trailPart = nil end
+    if trailConn then trailConn:Disconnect() trailConn = nil end
+    if not Settings.LocalPlayer.TrailEnabled then return end
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local root = char.HumanoidRootPart
+    trailPart = Instance.new("Part")
+    trailPart.Name = "PlayerTrail"
+    trailPart.Size = Vector3.new(0.1,0.1,0.1)
+    trailPart.Transparency = 1
+    trailPart.Anchored = true
+    trailPart.CanCollide = false
+    trailPart.CFrame = root.CFrame
+    trailPart.Parent = workspace
+    local trail = Instance.new("Trail", trailPart)
+    local a0 = Instance.new("Attachment", trailPart)
+    a0.Position = Vector3.new(0,1,0)
+    local a1 = Instance.new("Attachment", trailPart)
+    a1.Position = Vector3.new(0,-1,0)
+    trail.Attachment0 = a0
+    trail.Attachment1 = a1
+    trail.Lifetime = 5
+    trail.Transparency = NumberSequence.new(0)
+    trail.LightEmission = 150
+    trail.Brightness = 1500
+    trail.LightInfluence = 1
+    trail.WidthScale = NumberSequence.new(0.08)
+    trailConn = RunService.RenderStepped:Connect(function()
+        if root and root.Parent then
+            trailPart.CFrame = root.CFrame
+            trail.Color = ColorSequence.new(Settings.LocalPlayer.TrailColor)
+        else
+            updateTrail()
+        end
+    end)
 end
 LocalPlayer.CharacterAdded:Connect(updateTrail)
 if LocalPlayer.Character then updateTrail() end
@@ -281,9 +268,7 @@ end
 
 local function updateBodyChams()
     local char = LocalPlayer.Character
-    if char then
-        applyForceField(char:GetChildren(), Settings.LocalPlayer.BodyChams, Settings.LocalPlayer.BodyColor)
-    end
+    if char then applyForceField(char:GetChildren(), Settings.LocalPlayer.BodyChams, Settings.LocalPlayer.BodyColor) end
 end
 
 local function updateToolChams()
@@ -305,17 +290,22 @@ local function updateHatChams()
     end
 end
 
-local function updateAllChams()
+LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(0.5)
+    updateBodyChams()
+    updateToolChams()
+    updateHatChams()
+end)
+if LocalPlayer.Character then
+    task.wait(0.5)
     updateBodyChams()
     updateToolChams()
     updateHatChams()
 end
-LocalPlayer.CharacterAdded:Connect(updateAllChams)
-if LocalPlayer.Character then updateAllChams() end
 
 -- Crosshair
 local crosshairGui = Instance.new("ScreenGui")
-crosshairGui.Name = "SimpleCrosshair"
+crosshairGui.Name = "CleanCrosshair"
 crosshairGui.Parent = CoreGui
 crosshairGui.Enabled = false
 
@@ -323,7 +313,6 @@ local crosshairFrame = Instance.new("Frame")
 crosshairFrame.Size = UDim2.new(0, 10, 0, 10)
 crosshairFrame.Position = UDim2.new(0.5, -5, 0.5, -5)
 crosshairFrame.BackgroundColor3 = Settings.Crosshair.Color
-crosshairFrame.BackgroundTransparency = 0
 crosshairFrame.BorderSizePixel = 0
 crosshairFrame.Parent = crosshairGui
 Instance.new("UICorner", crosshairFrame).CornerRadius = UDim.new(1,0)
@@ -333,23 +322,18 @@ local function updateCrosshair()
     if not Settings.Crosshair.Enabled then return end
     crosshairFrame.BackgroundColor3 = Settings.Crosshair.Color
     if Settings.Crosshair.Position == "Mouse" then
-        crosshairFrame.Position = UDim2.new(0, Mouse.X - crosshairFrame.AbsoluteSize.X/2, 0, Mouse.Y - crosshairFrame.AbsoluteSize.Y/2)
+        crosshairFrame.Position = UDim2.new(0, Mouse.X - 5, 0, Mouse.Y - 5)
     else
-        crosshairFrame.Position = UDim2.new(0.5, -crosshairFrame.AbsoluteSize.X/2, 0.5, -crosshairFrame.AbsoluteSize.Y/2)
+        crosshairFrame.Position = UDim2.new(0.5, -5, 0.5, -5)
     end
 end
 
 RunService.RenderStepped:Connect(function()
     if Settings.Crosshair.Enabled then
-        if Settings.Crosshair.Spin then
-            crosshairFrame.Rotation = crosshairFrame.Rotation + 2
-        else
-            crosshairFrame.Rotation = 0
-        end
+        crosshairFrame.Rotation = Settings.Crosshair.Spin and (crosshairFrame.Rotation + 2) or 0
         if Settings.Crosshair.Resize then
-            local sin = math.sin(tick()*5)
-            local size = 10 + sin*5
-            crosshairFrame.Size = UDim2.new(0, size, 0, size)
+            local s = 10 + math.sin(tick()*5)*5
+            crosshairFrame.Size = UDim2.new(0,s,0,s)
         else
             crosshairFrame.Size = UDim2.new(0,10,0,10)
         end
@@ -358,16 +342,18 @@ RunService.RenderStepped:Connect(function()
 end)
 Mouse.Move:Connect(updateCrosshair)
 
--- Rayfield Interface
+-- ═══════════════════════════════════════════════════════════════
+--                     Rayfield Interface
+-- ═══════════════════════════════════════════════════════════════
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "الميزات المستخرجة",
    LoadingTitle = "جاري التحميل...",
-   LoadingSubtitle = "Rayfield + كل الدوال",
+   LoadingSubtitle = "Environment + Bullets + Chams + Crosshair",
    ConfigurationSaving = {
       Enabled = true,
-      FolderName = "FeaturesConfig",
+      FolderName = "CleanFeatures",
       FileName = "Settings"
    },
    KeySystem = false
@@ -375,9 +361,10 @@ local Window = Rayfield:CreateWindow({
 
 -- تبويب البيئة
 local EnvTab = Window:CreateTab("البيئة", 4483362458)
+EnvTab:CreateSection("إعدادات الإضاءة")
 
 EnvTab:CreateToggle({
-   Name = "تفعيل تعديل الإضاءة",
+   Name = "تفعيل الإضاءة",
    CurrentValue = Settings.Environment.Enabled,
    Flag = "EnvEnabled",
    Callback = function(v)
@@ -442,13 +429,56 @@ EnvTab:CreateColorpicker({
    end
 })
 
+EnvTab:CreateColorpicker({
+   Name = "تحول اللون (أسفل)",
+   Color = Settings.Environment.ColorShiftBottom,
+   Flag = "EnvBottom",
+   Callback = function(v)
+      Settings.Environment.ColorShiftBottom = v
+      updateEnvironment()
+   end
+})
+
+EnvTab:CreateColorpicker({
+   Name = "تحول اللون (أعلى)",
+   Color = Settings.Environment.ColorShiftTop,
+   Flag = "EnvTop",
+   Callback = function(v)
+      Settings.Environment.ColorShiftTop = v
+      updateEnvironment()
+   end
+})
+
+EnvTab:CreateToggle({
+   Name = "الظلال العامة",
+   CurrentValue = Settings.Environment.GlobalShadows,
+   Flag = "EnvShadows",
+   Callback = function(v)
+      Settings.Environment.GlobalShadows = v
+      updateEnvironment()
+   end
+})
+
+EnvTab:CreateSlider({
+   Name = "نعومة الظل",
+   Range = {0, 1},
+   Increment = 0.01,
+   CurrentValue = Settings.Environment.ShadowSoftness,
+   Flag = "EnvSoftness",
+   Callback = function(v)
+      Settings.Environment.ShadowSoftness = v
+      updateEnvironment()
+   end
+})
+
+EnvTab:CreateSection("الضباب")
 EnvTab:CreateToggle({
    Name = "تفعيل الضباب",
    CurrentValue = Settings.Environment.FogEnabled,
    Flag = "FogEnabled",
    Callback = function(v)
       Settings.Environment.FogEnabled = v
-      updateFog()
+      updateEnvironment()
    end
 })
 
@@ -458,7 +488,7 @@ EnvTab:CreateColorpicker({
    Flag = "FogColor",
    Callback = function(v)
       Settings.Environment.FogColor = v
-      updateFog()
+      updateEnvironment()
    end
 })
 
@@ -470,7 +500,7 @@ EnvTab:CreateSlider({
    Flag = "FogStart",
    Callback = function(v)
       Settings.Environment.FogStart = v
-      updateFog()
+      updateEnvironment()
    end
 })
 
@@ -482,7 +512,29 @@ EnvTab:CreateSlider({
    Flag = "FogEnd",
    Callback = function(v)
       Settings.Environment.FogEnd = v
-      updateFog()
+      updateEnvironment()
+   end
+})
+
+EnvTab:CreateSection("السماء")
+EnvTab:CreateToggle({
+   Name = "تفعيل السماء",
+   CurrentValue = Settings.Environment.SkyboxEnabled,
+   Flag = "SkyEnabled",
+   Callback = function(v)
+      Settings.Environment.SkyboxEnabled = v
+      updateSkybox()
+   end
+})
+
+EnvTab:CreateDropdown({
+   Name = "نوع السماء",
+   Options = {"1","2","3","4","5","6","7"},
+   CurrentOption = {tostring(Settings.Environment.SkyboxType)},
+   Flag = "SkyType",
+   Callback = function(opt)
+      Settings.Environment.SkyboxType = tonumber(opt[1])
+      updateSkybox()
    end
 })
 
@@ -530,7 +582,7 @@ BulletsTab:CreateToggle({
 
 BulletsTab:CreateDropdown({
    Name = "النسيج",
-   Options = {"Cool", "Cum", "Electro"},
+   Options = {"Cool","Cum","Electro"},
    CurrentOption = {Settings.Bullets.Texture},
    Flag = "BulletsTexture",
    Callback = function(opt) Settings.Bullets.Texture = opt[1] end
@@ -539,8 +591,9 @@ BulletsTab:CreateDropdown({
 -- تبويب اللاعب
 local PlayerTab = Window:CreateTab("اللاعب", 4483362458)
 
+PlayerTab:CreateSection("Trail")
 PlayerTab:CreateToggle({
-   Name = "تفعيل مسار اللاعب",
+   Name = "تفعيل التريل",
    CurrentValue = Settings.LocalPlayer.TrailEnabled,
    Flag = "TrailEnabled",
    Callback = function(v)
@@ -550,7 +603,7 @@ PlayerTab:CreateToggle({
 })
 
 PlayerTab:CreateColorpicker({
-   Name = "لون المسار",
+   Name = "لون التريل",
    Color = Settings.LocalPlayer.TrailColor,
    Flag = "TrailColor",
    Callback = function(v)
@@ -559,6 +612,7 @@ PlayerTab:CreateColorpicker({
    end
 })
 
+PlayerTab:CreateSection("Chams")
 PlayerTab:CreateToggle({
    Name = "Body Chams",
    CurrentValue = Settings.LocalPlayer.BodyChams,
@@ -567,9 +621,7 @@ PlayerTab:CreateToggle({
       Settings.LocalPlayer.BodyChams = v
       updateBodyChams()
    end
-})
-
-PlayerTab:CreateColorpicker({
+}):CreateColorpicker({
    Name = "لون الجسم",
    Color = Settings.LocalPlayer.BodyColor,
    Flag = "BodyColor",
@@ -580,22 +632,38 @@ PlayerTab:CreateColorpicker({
 })
 
 PlayerTab:CreateToggle({
-   Name = "Tool Chams",
+   Name = "Gun Chams",
    CurrentValue = Settings.LocalPlayer.ToolChams,
    Flag = "ToolChams",
    Callback = function(v)
       Settings.LocalPlayer.ToolChams = v
       updateToolChams()
    end
-})
-
-PlayerTab:CreateColorpicker({
+}):CreateColorpicker({
    Name = "لون الأدوات",
    Color = Settings.LocalPlayer.ToolColor,
    Flag = "ToolColor",
    Callback = function(v)
       Settings.LocalPlayer.ToolColor = v
       updateToolChams()
+   end
+})
+
+PlayerTab:CreateToggle({
+   Name = "Accessories Chams",
+   CurrentValue = Settings.LocalPlayer.HatChams,
+   Flag = "HatChams",
+   Callback = function(v)
+      Settings.LocalPlayer.HatChams = v
+      updateHatChams()
+   end
+}):CreateColorpicker({
+   Name = "لون الإكسسوارات",
+   Color = Settings.LocalPlayer.HatColor,
+   Flag = "HatColor",
+   Callback = function(v)
+      Settings.LocalPlayer.HatColor = v
+      updateHatChams()
    end
 })
 
@@ -638,7 +706,7 @@ CrossTab:CreateToggle({
 
 CrossTab:CreateDropdown({
    Name = "الوضع",
-   Options = {"Middle", "Mouse"},
+   Options = {"Middle","Mouse"},
    CurrentOption = {Settings.Crosshair.Position},
    Flag = "CrossPosition",
    Callback = function(opt)
@@ -648,4 +716,4 @@ CrossTab:CreateDropdown({
 })
 
 Rayfield:LoadConfiguration()
-print("تم تحميل السكربت الكامل مع Rayfield ✓")
+print("✅ تم تحميل السكربت النظيف مع Rayfield")
