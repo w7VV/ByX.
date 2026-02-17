@@ -1,16 +1,28 @@
--- Rayfield Library Loader
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+--[[
+    سكربت ميزات مستخرجة (Environment, Bullets, Local Player, Crosshair)
+    مع واجهة Rayfield
+    تم استخراج الكود الأصلي من Psalms.Tech وتعديله ليعمل مع Rayfield
+]]
 
--- Services
+-- تأكد من عدم وجود أخطاء بالمكتبات
+if not getgenv then
+    getgenv = function() return _G end
+end
+
+-- خدمات
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
-local Camera = Workspace.CurrentCamera
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
--- Original Lighting settings
+-- ========================
+-- إعدادات البيئة (Environment)
+-- ========================
 local originalSettings = {
     FogColor = Lighting.FogColor,
     FogStart = Lighting.FogStart,
@@ -26,7 +38,6 @@ local originalSettings = {
     ShadowSoftness = Lighting.ShadowSoftness
 }
 
--- Environment settings table
 local Environment = {
     Settings = {
         Exposure = 0,
@@ -46,7 +57,6 @@ local Environment = {
     }
 }
 
--- Update world lighting based on settings
 local function UpdateWorld()
     if Environment.Settings.Enabled then
         Lighting.Ambient = Environment.Settings.Ambient
@@ -71,7 +81,6 @@ local function UpdateWorld()
     end
 end
 
--- Fog update
 local function UpdateFog()
     if Environment.Settings.FogEnabled then
         Lighting.FogColor = Environment.Settings.FogColor
@@ -84,7 +93,9 @@ local function UpdateFog()
     end
 end
 
--- Skybox variables
+-- ========================
+-- Skybox
+-- ========================
 local skyboxEnabled = false
 local skyboxType = 1
 local function ChangeSkybox()
@@ -149,14 +160,15 @@ local function ChangeSkybox()
     end
 end
 
--- Bullet trail textures
+-- ========================
+-- إعدادات الرصاص (Bullets)
+-- ========================
 local BulletTexture = {
     Electro = "rbxassetid://139193109954329",
     Cool = "rbxassetid://116848240236550",
     Cum = "rbxassetid://88263664141635"
 }
 
--- Bullet trail config
 local Configurations = {
     Visuals = {
         Bullet_Trails = {
@@ -170,7 +182,33 @@ local Configurations = {
     }
 }
 
--- Utility functions for bullet trails
+local function GetBullet()
+    if Workspace:FindFirstChild("Ignored") and Workspace.Ignored:FindFirstChild("Siren") and Workspace.Ignored.Siren:FindFirstChild("Radius") then
+        return {
+            BulletPath = Workspace.Ignored.Siren.Radius,
+            BulletName = "BULLET_RAYS",
+            BulletBeamName = "GunBeam"
+        }
+    elseif Workspace:FindFirstChild("Ignored") then
+        return {
+            BulletPath = Workspace.Ignored,
+            BulletName = "BULLET_RAYS",
+            BulletBeamName = "GunBeam"
+        }
+    else
+        return {
+            BulletPath = Workspace,
+            BulletName = "Part",
+            BulletBeamName = "gb"
+        }
+    end
+end
+
+local support = GetBullet()
+local bulletPath = support.BulletPath
+local bulletName = support.BulletName
+local bulletBeamName = support.BulletBeamName
+
 local function createBeam(textureId, width, from, to, color, duration, fadeEnabled)
     local mainPart = Instance.new("Part")
     mainPart.Parent = Workspace
@@ -237,34 +275,6 @@ local function createBeam(textureId, width, from, to, color, duration, fadeEnabl
     end)
 end
 
--- Detect bullets and create trails
-local function GetBullet()
-    if Workspace:FindFirstChild("Ignored") and Workspace.Ignored:FindFirstChild("Siren") and Workspace.Ignored.Siren:FindFirstChild("Radius") then
-        return {
-            BulletPath = Workspace.Ignored.Siren.Radius,
-            BulletName = "BULLET_RAYS",
-            BulletBeamName = "GunBeam"
-        }
-    elseif Workspace:FindFirstChild("Ignored") then
-        return {
-            BulletPath = Workspace.Ignored,
-            BulletName = "BULLET_RAYS",
-            BulletBeamName = "GunBeam"
-        }
-    else
-        return {
-            BulletPath = Workspace,
-            BulletName = "Part",
-            BulletBeamName = "gb"
-        }
-    end
-end
-
-local support = GetBullet()
-local bulletPath = support.BulletPath
-local bulletName = support.BulletName
-local bulletBeamName = support.BulletBeamName
-
 local function OnBulletAdded(obj)
     if obj.Name ~= bulletName and not obj:FindFirstChild("Attachment") and not obj:FindFirstChild(bulletBeamName) then return end
 
@@ -299,7 +309,9 @@ if bulletPath then
     bulletPath.ChildAdded:Connect(OnBulletAdded)
 end
 
--- Local Player Trail
+-- ========================
+-- إعدادات اللاعب المحلي (Trail & Chams)
+-- ========================
 local trailObjects = {
     trailPart = nil,
     renderConnection = nil,
@@ -382,7 +394,7 @@ local function SetTrailEnabled(state)
     end
 end
 
--- Local Player Chams (ForceField)
+-- Local Player Chams
 local localPlayerEsp = {
     ForcefieldBody = { Enabled = false, Color = Color3.fromRGB(255, 255, 255) },
     ForcefieldTools = { Enabled = false, Color = Color3.fromRGB(255, 255, 255) },
@@ -435,7 +447,6 @@ local function UpdateAllForcefields()
     ApplyForcefieldToHats()
 end
 
--- Connect character respawn
 LocalPlayer.CharacterAdded:Connect(function(character)
     character:WaitForChild("HumanoidRootPart")
     UpdateAllForcefields()
@@ -445,396 +456,462 @@ if LocalPlayer.Character then
     UpdateAllForcefields()
 end
 
--- Crosshair setup
-local Cursor = loadstring(game:HttpGet("https://gist.githubusercontent.com/CongoOhioDog/53ec2f8bdde91bda1d9a17fe5d11e23f/raw/1e5dde366ce1f20ea6621ed230837eb69f441dbc/gistfile1.txt", true))()
-getgenv().crosshair = {
-    color = Color3.fromRGB(255, 255, 255),
-    mode = "Middle",
-    sticky = false,
-    enabled = false,
-    spin = false,
-    resize = false,
-    position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-}
-
+-- ========================
+-- إعدادات المؤشر (Crosshair)
+-- ========================
+-- استخدام crosshair من السكربت الأصلي (بدون Drawing لأن Rayfield لا يدعمه مباشرة، لكننا سنحتفظ بالكود لإمكانية التوسع)
+-- سأقوم بتحميل crosshair كـ UI بسيط باستخدام ScreenGui
+local crosshairEnabled = false
+local crosshairColor = Color3.fromRGB(255, 255, 255)
+local crosshairSpin = false
+local crosshairResize = false
+local crosshairSticky = false
 local crosshairPositionMode = "Middle"
-RunService.PostSimulation:Connect(function()
-    if getgenv().crosshair.sticky and TargetPlr and TargetPlr.Character then
-        -- Sticky to target is not extracted (no aimbot), so we'll ignore or disable.
-        -- We'll keep the original logic but TargetPlr may not exist. Better to disable sticky.
-        -- We'll handle it by not using sticky since we don't have target selection.
+
+-- إنشاء عنصر واجهة بسيط للـ Crosshair
+local crosshairGui = Instance.new("ScreenGui")
+crosshairGui.Name = "RayfieldCrosshair"
+crosshairGui.Parent = CoreGui
+crosshairGui.Enabled = false
+
+local crosshairFrame = Instance.new("Frame")
+crosshairFrame.Size = UDim2.new(0, 10, 0, 10)
+crosshairFrame.Position = UDim2.new(0.5, -5, 0.5, -5)
+crosshairFrame.BackgroundColor3 = crosshairColor
+crosshairFrame.BackgroundTransparency = 0
+crosshairFrame.BorderSizePixel = 0
+crosshairFrame.Parent = crosshairGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(1, 0)
+uiCorner.Parent = crosshairFrame
+
+local function UpdateCrosshairPosition()
+    if crosshairPositionMode == "Mouse" then
+        local mousePos = UserInputService:GetMouseLocation()
+        crosshairFrame.Position = UDim2.new(0, mousePos.X - 5, 0, mousePos.Y - 5)
     else
-        getgenv().crosshair.mode = crosshairPositionMode
+        crosshairFrame.Position = UDim2.new(0.5, -5, 0.5, -5)
+    end
+end
+
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        if crosshairPositionMode == "Mouse" then
+            UpdateCrosshairPosition()
+        end
     end
 end)
 
--- Rayfield Window
+-- دورة حياة الـ Crosshair
+RunService.RenderStepped:Connect(function()
+    if crosshairEnabled then
+        crosshairGui.Enabled = true
+        crosshairFrame.BackgroundColor3 = crosshairColor
+        if crosshairSpin then
+            crosshairFrame.Rotation = crosshairFrame.Rotation + 2
+        else
+            crosshairFrame.Rotation = 0
+        end
+        if crosshairResize then
+            local sin = math.sin(tick() * 5)
+            local size = 10 + sin * 5
+            crosshairFrame.Size = UDim2.new(0, size, 0, size)
+            crosshairFrame.Position = UDim2.new(0.5, -size/2, 0.5, -size/2)
+        end
+    else
+        crosshairGui.Enabled = false
+    end
+end)
+
+-- ========================
+-- تحميل Rayfield
+-- ========================
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- إنشاء النافذة الرئيسية
 local Window = Rayfield:CreateWindow({
-    Name = "Extracted Features",
-    LoadingTitle = "Loading...",
-    LoadingSubtitle = "by Psalms Tech",
-    ConfigurationSaving = { Enabled = true, FolderName = "PsalmsTech", FileName = "Extracted" },
-    Discord = { Enabled = false },
+    Name = "الميزات المستخرجة",
+    LoadingTitle = "جاري التحميل...",
+    LoadingSubtitle = "من Psalms.Tech",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "PsalmsTech",
+        FileName = "ExtractedFeatures"
+    },
+    Discord = {
+        Enabled = false
+    },
     KeySystem = false
 })
 
--- Environment Tab
-local EnvTab = Window:CreateTab("Environment", "rbxassetid://4483345998")
-local EnvSection = EnvTab:CreateSection("Lighting")
+-- تبويب البيئة
+local EnvTab = Window:CreateTab("البيئة", "rbxassetid://4483345998")
+local EnvSection = EnvTab:CreateSection("الإضاءة")
 EnvSection:CreateToggle({
-    Name = "Enable Lighting Override",
-    CurrentValue = false,
+    Name = "تفعيل تعديل الإضاءة",
+    CurrentValue = Environment.Settings.Enabled,
     Flag = "EnvEnable",
-    Callback = function(value)
-        Environment.Settings.Enabled = value
+    Callback = function(Value)
+        Environment.Settings.Enabled = Value
         UpdateWorld()
     end
 })
 EnvSection:CreateSlider({
-    Name = "Exposure",
-    Range = {0, 10},
-    Increment = 0.1,
-    CurrentValue = Environment.Settings.Exposure,
-    Flag = "EnvExposure",
-    Callback = function(value)
-        Environment.Settings.Exposure = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateSlider({
-    Name = "Clock Time",
-    Range = {0, 24},
-    Increment = 0.1,
-    CurrentValue = Environment.Settings.ClockTime,
-    Flag = "EnvClock",
-    Callback = function(value)
-        Environment.Settings.ClockTime = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateSlider({
-    Name = "Brightness",
+    Name = "السطوع",
     Range = {0, 10},
     Increment = 0.1,
     CurrentValue = Environment.Settings.Brightness,
     Flag = "EnvBrightness",
-    Callback = function(value)
-        Environment.Settings.Brightness = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateColorPicker({
-    Name = "Ambient Color",
-    CurrentValue = Environment.Settings.Ambient,
-    Flag = "EnvAmbient",
-    Callback = function(value)
-        Environment.Settings.Ambient = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateColorPicker({
-    Name = "Outdoor Ambient",
-    CurrentValue = Environment.Settings.OutdoorAmbient,
-    Flag = "EnvOutdoor",
-    Callback = function(value)
-        Environment.Settings.OutdoorAmbient = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateColorPicker({
-    Name = "Color Shift Bottom",
-    CurrentValue = Environment.Settings.ColorShift_Bottom,
-    Flag = "EnvShiftBottom",
-    Callback = function(value)
-        Environment.Settings.ColorShift_Bottom = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateColorPicker({
-    Name = "Color Shift Top",
-    CurrentValue = Environment.Settings.ColorShift_Top,
-    Flag = "EnvShiftTop",
-    Callback = function(value)
-        Environment.Settings.ColorShift_Top = value
-        UpdateWorld()
-    end
-})
-EnvSection:CreateToggle({
-    Name = "Global Shadows",
-    CurrentValue = Environment.Settings.GlobalShadows,
-    Flag = "EnvShadows",
-    Callback = function(value)
-        Environment.Settings.GlobalShadows = value
+    Callback = function(Value)
+        Environment.Settings.Brightness = Value
         UpdateWorld()
     end
 })
 EnvSection:CreateSlider({
-    Name = "Shadow Softness",
+    Name = "وقت الساعة",
+    Range = {0, 24},
+    Increment = 0.1,
+    CurrentValue = Environment.Settings.ClockTime,
+    Flag = "EnvClock",
+    Callback = function(Value)
+        Environment.Settings.ClockTime = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateSlider({
+    Name = "مستوى التعريض",
+    Range = {0, 10},
+    Increment = 0.1,
+    CurrentValue = Environment.Settings.Exposure,
+    Flag = "EnvExposure",
+    Callback = function(Value)
+        Environment.Settings.Exposure = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateColorPicker({
+    Name = "لون الضوء المحيط",
+    CurrentValue = Environment.Settings.Ambient,
+    Flag = "EnvAmbient",
+    Callback = function(Value)
+        Environment.Settings.Ambient = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateColorPicker({
+    Name = "لون الضوء الخارجي",
+    CurrentValue = Environment.Settings.OutdoorAmbient,
+    Flag = "EnvOutdoor",
+    Callback = function(Value)
+        Environment.Settings.OutdoorAmbient = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateColorPicker({
+    Name = "تحول اللون (أسفل)",
+    CurrentValue = Environment.Settings.ColorShift_Bottom,
+    Flag = "EnvShiftBottom",
+    Callback = function(Value)
+        Environment.Settings.ColorShift_Bottom = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateColorPicker({
+    Name = "تحول اللون (أعلى)",
+    CurrentValue = Environment.Settings.ColorShift_Top,
+    Flag = "EnvShiftTop",
+    Callback = function(Value)
+        Environment.Settings.ColorShift_Top = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateToggle({
+    Name = "الظلال العامة",
+    CurrentValue = Environment.Settings.GlobalShadows,
+    Flag = "EnvShadows",
+    Callback = function(Value)
+        Environment.Settings.GlobalShadows = Value
+        UpdateWorld()
+    end
+})
+EnvSection:CreateSlider({
+    Name = "نعومة الظل",
     Range = {0, 1},
     Increment = 0.05,
     CurrentValue = Environment.Settings.ShadowSoftness,
     Flag = "EnvShadowSoft",
-    Callback = function(value)
-        Environment.Settings.ShadowSoftness = value
+    Callback = function(Value)
+        Environment.Settings.ShadowSoftness = Value
         UpdateWorld()
     end
 })
 
-local FogSection = EnvTab:CreateSection("Fog")
+local FogSection = EnvTab:CreateSection("الضباب")
 FogSection:CreateToggle({
-    Name = "Enable Fog",
-    CurrentValue = false,
+    Name = "تفعيل الضباب",
+    CurrentValue = Environment.Settings.FogEnabled,
     Flag = "FogEnable",
-    Callback = function(value)
-        Environment.Settings.FogEnabled = value
+    Callback = function(Value)
+        Environment.Settings.FogEnabled = Value
         UpdateFog()
     end
 })
 FogSection:CreateColorPicker({
-    Name = "Fog Color",
+    Name = "لون الضباب",
     CurrentValue = Environment.Settings.FogColor,
     Flag = "FogColor",
-    Callback = function(value)
-        Environment.Settings.FogColor = value
+    Callback = function(Value)
+        Environment.Settings.FogColor = Value
         UpdateFog()
     end
 })
 FogSection:CreateSlider({
-    Name = "Fog Start",
+    Name = "بداية الضباب",
     Range = {0, 1000},
     Increment = 1,
     CurrentValue = Environment.Settings.FogStart,
     Flag = "FogStart",
-    Callback = function(value)
-        Environment.Settings.FogStart = value
+    Callback = function(Value)
+        Environment.Settings.FogStart = Value
         UpdateFog()
     end
 })
 FogSection:CreateSlider({
-    Name = "Fog End",
+    Name = "نهاية الضباب",
     Range = {0, 1000},
     Increment = 1,
     CurrentValue = Environment.Settings.FogEnd,
     Flag = "FogEnd",
-    Callback = function(value)
-        Environment.Settings.FogEnd = value
+    Callback = function(Value)
+        Environment.Settings.FogEnd = Value
         UpdateFog()
     end
 })
 
-local SkyboxSection = EnvTab:CreateSection("Skybox")
+local SkyboxSection = EnvTab:CreateSection("السماء")
 SkyboxSection:CreateToggle({
-    Name = "Enable Skybox",
-    CurrentValue = false,
+    Name = "تفعيل تغيير السماء",
+    CurrentValue = skyboxEnabled,
     Flag = "SkyboxEnable",
-    Callback = function(value)
-        skyboxEnabled = value
+    Callback = function(Value)
+        skyboxEnabled = Value
         ChangeSkybox()
     end
 })
 SkyboxSection:CreateDropdown({
-    Name = "Skybox Type",
+    Name = "نوع السماء",
     Options = {"1", "2", "3", "4", "5", "6", "7"},
     CurrentOption = "1",
     Flag = "SkyboxType",
-    Callback = function(value)
-        skyboxType = tonumber(value)
+    Callback = function(Value)
+        skyboxType = tonumber(Value)
         ChangeSkybox()
     end
 })
 
--- Bullets Tab
-local BulletTab = Window:CreateTab("Bullets", "rbxassetid://4483345998")
-local BulletSection = BulletTab:CreateSection("Bullet Trails")
+-- تبويب الرصاص
+local BulletTab = Window:CreateTab("الرصاص", "rbxassetid://4483345998")
+local BulletSection = BulletTab:CreateSection("مسارات الرصاص")
 BulletSection:CreateToggle({
-    Name = "Enable Bullet Trails",
-    CurrentValue = false,
-    Flag = "BulletTrailEnable",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Enabled = value
+    Name = "تفعيل مسارات الرصاص",
+    CurrentValue = Configurations.Visuals.Bullet_Trails.Enabled,
+    Flag = "BulletEnable",
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Enabled = Value
     end
 })
 BulletSection:CreateColorPicker({
-    Name = "Trail Color",
+    Name = "لون المسار",
     CurrentValue = Configurations.Visuals.Bullet_Trails.Color,
     Flag = "BulletColor",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Color = value
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Color = Value
     end
 })
 BulletSection:CreateSlider({
-    Name = "Width",
+    Name = "العرض",
     Range = {0.1, 5},
     Increment = 0.1,
     CurrentValue = Configurations.Visuals.Bullet_Trails.Width,
     Flag = "BulletWidth",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Width = value
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Width = Value
     end
 })
 BulletSection:CreateSlider({
-    Name = "Duration",
+    Name = "المدة",
     Range = {0.5, 10},
     Increment = 0.1,
     CurrentValue = Configurations.Visuals.Bullet_Trails.Duration,
     Flag = "BulletDuration",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Duration = value
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Duration = Value
     end
 })
 BulletSection:CreateToggle({
-    Name = "Fade",
-    CurrentValue = false,
+    Name = "تلاشي",
+    CurrentValue = Configurations.Visuals.Bullet_Trails.Fade,
     Flag = "BulletFade",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Fade = value
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Fade = Value
     end
 })
 BulletSection:CreateDropdown({
-    Name = "Texture",
+    Name = "نسيج المسار",
     Options = {"Cool", "Cum", "Electro"},
-    CurrentOption = "Cool",
+    CurrentOption = Configurations.Visuals.Bullet_Trails.Texture,
     Flag = "BulletTexture",
-    Callback = function(value)
-        Configurations.Visuals.Bullet_Trails.Texture = value
+    Callback = function(Value)
+        Configurations.Visuals.Bullet_Trails.Texture = Value
     end
 })
 
--- Local Player Tab
-local LocalTab = Window:CreateTab("Local Player", "rbxassetid://4483345998")
-local TrailSection = LocalTab:CreateSection("Trail")
+-- تبويب اللاعب المحلي
+local LocalTab = Window:CreateTab("اللاعب", "rbxassetid://4483345998")
+local TrailSection = LocalTab:CreateSection("مسار اللاعب")
 TrailSection:CreateToggle({
-    Name = "Enable Trail",
-    CurrentValue = false,
+    Name = "تفعيل مسار اللاعب",
+    CurrentValue = trailEnabled,
     Flag = "TrailEnable",
-    Callback = SetTrailEnabled
+    Callback = function(Value)
+        SetTrailEnabled(Value)
+    end
 })
 TrailSection:CreateColorPicker({
-    Name = "Trail Color",
+    Name = "لون المسار",
     CurrentValue = trailColor,
     Flag = "TrailColor",
-    Callback = function(value)
-        trailColor = value
+    Callback = function(Value)
+        trailColor = Value
     end
 })
 
-local BodyChamSection = LocalTab:CreateSection("Body Chams")
+local BodyChamSection = LocalTab:CreateSection("شامات الجسم")
 BodyChamSection:CreateToggle({
-    Name = "Body ForceField",
-    CurrentValue = false,
+    Name = "تفعيل شامات الجسم",
+    CurrentValue = localPlayerEsp.ForcefieldBody.Enabled,
     Flag = "BodyCham",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldBody.Enabled = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldBody.Enabled = Value
         ApplyForcefieldToBody()
     end
 })
 BodyChamSection:CreateColorPicker({
-    Name = "Body Color",
+    Name = "لون الجسم",
     CurrentValue = localPlayerEsp.ForcefieldBody.Color,
     Flag = "BodyChamColor",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldBody.Color = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldBody.Color = Value
         ApplyForcefieldToBody()
     end
 })
 
-local ToolChamSection = LocalTab:CreateSection("Tool Chams")
+local ToolChamSection = LocalTab:CreateSection("شامات الأدوات")
 ToolChamSection:CreateToggle({
-    Name = "Tool ForceField",
-    CurrentValue = false,
+    Name = "تفعيل شامات الأدوات",
+    CurrentValue = localPlayerEsp.ForcefieldTools.Enabled,
     Flag = "ToolCham",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldTools.Enabled = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldTools.Enabled = Value
         ApplyForcefieldToTools()
     end
 })
 ToolChamSection:CreateColorPicker({
-    Name = "Tool Color",
+    Name = "لون الأدوات",
     CurrentValue = localPlayerEsp.ForcefieldTools.Color,
     Flag = "ToolChamColor",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldTools.Color = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldTools.Color = Value
         ApplyForcefieldToTools()
     end
 })
 
-local HatChamSection = LocalTab:CreateSection("Accessories Chams")
+local HatChamSection = LocalTab:CreateSection("شامات الإكسسوارات")
 HatChamSection:CreateToggle({
-    Name = "Accessories ForceField",
-    CurrentValue = false,
+    Name = "تفعيل شامات الإكسسوارات",
+    CurrentValue = localPlayerEsp.ForcefieldHats.Enabled,
     Flag = "HatCham",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldHats.Enabled = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldHats.Enabled = Value
         ApplyForcefieldToHats()
     end
 })
 HatChamSection:CreateColorPicker({
-    Name = "Accessories Color",
+    Name = "لون الإكسسوارات",
     CurrentValue = localPlayerEsp.ForcefieldHats.Color,
     Flag = "HatChamColor",
-    Callback = function(value)
-        localPlayerEsp.ForcefieldHats.Color = value
+    Callback = function(Value)
+        localPlayerEsp.ForcefieldHats.Color = Value
         ApplyForcefieldToHats()
     end
 })
 
--- Crosshair Tab
-local CrosshairTab = Window:CreateTab("Crosshair", "rbxassetid://4483345998")
-local CrossSection = CrosshairTab:CreateSection("Crosshair Settings")
+-- تبويب المؤشر
+local CrossTab = Window:CreateTab("المؤشر", "rbxassetid://4483345998")
+local CrossSection = CrossTab:CreateSection("إعدادات المؤشر")
 CrossSection:CreateToggle({
-    Name = "Enable Crosshair",
-    CurrentValue = false,
+    Name = "تفعيل المؤشر",
+    CurrentValue = crosshairEnabled,
     Flag = "CrossEnable",
-    Callback = function(value)
-        getgenv().crosshair.enabled = value
+    Callback = function(Value)
+        crosshairEnabled = Value
     end
 })
 CrossSection:CreateColorPicker({
-    Name = "Crosshair Color",
-    CurrentValue = getgenv().crosshair.color,
+    Name = "لون المؤشر",
+    CurrentValue = crosshairColor,
     Flag = "CrossColor",
-    Callback = function(value)
-        getgenv().crosshair.color = value
+    Callback = function(Value)
+        crosshairColor = Value
     end
 })
 CrossSection:CreateToggle({
-    Name = "Spin",
-    CurrentValue = false,
+    Name = "دوران",
+    CurrentValue = crosshairSpin,
     Flag = "CrossSpin",
-    Callback = function(value)
-        getgenv().crosshair.spin = value
+    Callback = function(Value)
+        crosshairSpin = Value
     end
 })
 CrossSection:CreateToggle({
-    Name = "Resize",
-    CurrentValue = false,
+    Name = "تكبير وتصغير",
+    CurrentValue = crosshairResize,
     Flag = "CrossResize",
-    Callback = function(value)
-        getgenv().crosshair.resize = value
+    Callback = function(Value)
+        crosshairResize = Value
     end
 })
 CrossSection:CreateToggle({
-    Name = "Sticky (requires target)",
-    CurrentValue = false,
+    Name = "الالتصاق بالهدف (غير مفعل)", -- بدون نظام هدف
+    CurrentValue = crosshairSticky,
     Flag = "CrossSticky",
-    Callback = function(value)
-        getgenv().crosshair.sticky = value
+    Callback = function(Value)
+        crosshairSticky = Value
     end
 })
 CrossSection:CreateDropdown({
-    Name = "Position",
+    Name = "الوضع",
     Options = {"Middle", "Mouse"},
-    CurrentOption = "Middle",
-    Flag = "CrossPosition",
-    Callback = function(value)
-        crosshairPositionMode = value
-        getgenv().crosshair.mode = value
+    CurrentOption = crosshairPositionMode,
+    Flag = "CrossPos",
+    Callback = function(Value)
+        crosshairPositionMode = Value
+        UpdateCrosshairPosition()
     end
 })
 
--- Notify
+-- رسالة تأكيد
 Rayfield:Notify({
-    Title = "Extracted Features Loaded",
-    Content = "Environment, Bullets, Local Player, Crosshair",
+    Title = "تم التحميل",
+    Content = "تم تحميل جميع الميزات الأربعة بنجاح",
     Duration = 3
 })
+
+-- فتح الواجهة عند الضغط على مفتاح (اختياري)
+local toggleKey = Enum.KeyCode.RightControl
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == toggleKey then
+        Window:Toggle()
+    end
+end)
