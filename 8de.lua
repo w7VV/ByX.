@@ -1,8 +1,6 @@
---[[
-    واجهة بسيطة للميزات المستخرجة
-    (Environment, Bullets, Local Player, Crosshair)
-    بدون مكتبات خارجية
-]]
+-- واجهة بسيطة للميزات المستخرجة
+-- (Environment, Bullets, Local Player, Crosshair)
+-- بدون مكتبات خارجية
 
 -- الخدمات
 local Players = game:GetService("Players")
@@ -15,9 +13,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
--- ========================
 -- الإعدادات الأساسية
--- ========================
 local Settings = {
     Environment = {
         Enabled = false,
@@ -43,7 +39,7 @@ local Settings = {
         Width = 1.0,
         Duration = 3,
         Fade = false,
-        Texture = "Cool" -- Cool, Cum, Electro
+        Texture = "Cool"
     },
     LocalPlayer = {
         TrailEnabled = false,
@@ -61,13 +57,11 @@ local Settings = {
         Spin = false,
         Resize = false,
         Sticky = false,
-        Position = "Middle" -- Middle, Mouse
+        Position = "Middle"
     }
 }
 
--- ========================
 -- حفظ الإعدادات الأصلية للإضاءة
--- ========================
 local originalLighting = {
     Ambient = Lighting.Ambient,
     Brightness = Lighting.Brightness,
@@ -83,9 +77,7 @@ local originalLighting = {
     FogEnd = Lighting.FogEnd
 }
 
--- ========================
-# دوال البيئة
--- ========================
+-- دوال البيئة
 local function updateEnvironment()
     if Settings.Environment.Enabled then
         Lighting.Ambient = Settings.Environment.Ambient
@@ -152,9 +144,7 @@ local function updateSkybox()
     end
 end
 
--- ========================
-# دوال الرصاص
--- ========================
+-- دوال الرصاص
 local bulletTextures = {
     Cool = "rbxassetid://116848240236550",
     Cum = "rbxassetid://88263664141635",
@@ -240,9 +230,7 @@ bulletPath.ChildAdded:Connect(function(obj)
     )
 end)
 
--- ========================
-# دوال اللاعب المحلي (Trail & Chams)
--- ========================
+-- دوال اللاعب المحلي (Trail & Chams)
 -- Trail
 local trailPart, trailConn
 local function updateTrail()
@@ -337,9 +325,7 @@ end
 LocalPlayer.CharacterAdded:Connect(updateAllChams)
 if LocalPlayer.Character then updateAllChams() end
 
--- ========================
-# دوال المؤشر
--- ========================
+-- دوال المؤشر
 local crosshairGui = Instance.new("ScreenGui")
 crosshairGui.Name = "SimpleCrosshair"
 crosshairGui.Parent = CoreGui
@@ -385,9 +371,7 @@ end)
 
 Mouse.Move:Connect(updateCrosshair)
 
--- ========================
-# بناء الواجهة البسيطة
--- ========================
+-- بناء الواجهة البسيطة
 local gui = Instance.new("ScreenGui")
 gui.Name = "SimpleFeaturesGUI"
 gui.Parent = CoreGui
@@ -617,30 +601,7 @@ local function createColorPicker(parent, text, flag, callback)
             picker.Parent = gui
             Instance.new("UICorner", picker).CornerRadius = UDim.new(0,6)
 
-            local hue, sat, val = 1,1,1
-            local function updateColor()
-                local c = Color3.fromHSV(hue, sat, val)
-                Settings[flag] = c
-                colorBtn.BackgroundColor3 = c
-                callback(c)
-            end
-
-            -- شريط الهوى
-            local hueSlider = Instance.new("Frame")
-            hueSlider.Size = UDim2.new(1, -20, 0, 20)
-            hueSlider.Position = UDim2.new(0, 10, 0, 10)
-            hueSlider.BackgroundColor3 = Color3.fromRGB(255,0,0)
-            hueSlider.Parent = picker
-            -- (يمكن إضافة تحكم كامل، لكن للتبسيط نكتفي بثلاثة أشرطة أساسية)
-            -- للاختصار، سأستخدم منزلقات بسيطة
-
-            local rSlider = Instance.new("Frame")
-            rSlider.Size = UDim2.new(1, -20, 0, 20)
-            rSlider.Position = UDim2.new(0, 10, 0, 40)
-            rSlider.BackgroundColor3 = Color3.fromRGB(80,80,80)
-            rSlider.Parent = picker
-            -- ... (يمكن إكمال ولكن سيصبح طويلاً جداً، نكتفي بالمبدأ)
-            -- سأغلق النافذة بعد ثانية للتبسيط
+            -- (للتبسيط، نغلق النافذة بعد ثانية)
             task.delay(3, picker.Destroy, picker)
         end
     end)
